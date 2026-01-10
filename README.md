@@ -8,19 +8,19 @@ A next-generation queue management system designed for modern healthcare facilit
 
 ## 🚀 Key Features
 
-### � Core Modules
+### ⭐ Core Modules
 - **Dynamic Service Management**: Supports Consultation, Laboratory, Pharmacy, Radiology, and custom services.
 - **Intelligent Priority Engine**: Automated prioritization for Emergency (EMG), Senior Citizens (SRC), Persons with Disability (PWD), and Regular (REG) patients.
 - **Virtual Queueing**: Contactless, web-based check-in allowing patients to join the queue remotely.
 - **Smart Notifications**: Real-time updates via SMS (Twilio Integration) and Email when a patient's turn is approaching.
 
-### �️ Specialized Interfaces
+### 💻 Specialized Interfaces
 - **Admin Dashboard**: centralized control for services, counters, staff management, and analytics.
 - **Staff Dashboard**: Efficient patient calling, servicing, and status management.
 - **Live Display Board (TV Mode)**: Real-time, voice-announced queue updates designed for waiting area screens.
 - **Patient Portal**: Mobile-responsive status checker and digital ticketing.
 
-### � Analytics & Reporting
+### 📈 Analytics & Reporting
 - **Real-time Metrics**: Live monitoring of waiting times, service speeds, and queue lengths.
 - **PDF Reports**: Generate Daily, Weekly, and Monthly performance reports.
 - **Audit Logs**: Comprehensive activity tracking for security and accountability.
@@ -41,8 +41,8 @@ A next-generation queue management system designed for modern healthcare facilit
 
 ### 1. Clone & Setup
 ```bash
-git clone https://github.com/your-org/healthcare-queue-system.git
-cd healthcare-queue-system
+git clone https://github.com/Roizycode/HealthcareQueue-System.git
+cd HealthcareQueue-System
 
 # Install PHP dependencies
 composer install

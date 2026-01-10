@@ -1,6 +1,48 @@
 @extends('layouts.admin')
 
-@section('title', 'Virtual Queue - HealthQueue')
+@section('title', 'Virtual Queue - Smart Healthcare')
+
+@push('styles')
+<style>
+    @media (max-width: 768px) {
+        /* Mobile Receipt Table Styling */
+        .table thead { display: none; }
+        .table tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            position: relative;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+        }
+        .table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: none;
+            padding: 0.5rem 0;
+            text-align: right;
+        }
+        .table td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 0.85rem;
+            margin-right: 1rem;
+            text-align: left;
+        }
+        .table td:last-child {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #dee2e6;
+            justify-content: center;
+        }
+        .table td:last-child::before { display: none; }
+    }
+</style>
+@endpush
 
 @section('content')
 <!-- Header -->
@@ -16,7 +58,7 @@
 
 <!-- Stats -->
 <div class="row g-3 mb-4">
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center py-3">
                 <small class="text-muted text-uppercase d-block mb-1" style="font-size: 0.65rem;">Online Today</small>
@@ -24,7 +66,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center py-3">
                 <small class="text-muted text-uppercase d-block mb-1" style="font-size: 0.65rem;">Walk-in Today</small>
@@ -32,7 +74,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center py-3">
                 <small class="text-muted text-uppercase d-block mb-1" style="font-size: 0.65rem;">Waiting</small>
@@ -40,7 +82,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center py-3">
                 <small class="text-muted text-uppercase d-block mb-1" style="font-size: 0.65rem;">Completed</small>
@@ -77,19 +119,19 @@
                 <tbody>
                     @forelse($recentQueues ?? [] as $queue)
                     <tr>
-                        <td class="fw-bold">{{ $queue->queue_number }}</td>
-                        <td>{{ $queue->patient->full_name ?? 'Guest' }}</td>
-                        <td>
+                        <td class="fw-bold" data-label="Queue #">{{ $queue->queue_number }}</td>
+                        <td data-label="Patient">{{ $queue->patient->full_name ?? 'Guest' }}</td>
+                        <td data-label="Service">
                             <span class="badge" style="background: {{ $queue->service->color ?? '#6c757d' }}; color: white;">{{ $queue->service->name ?? '-' }}</span>
                         </td>
-                        <td>
+                        <td data-label="Type">
                             @if($queue->type === 'online')
                                 <span class="badge bg-primary"><i class="fas fa-globe me-1"></i>Online</span>
                             @else
                                 <span class="badge bg-success"><i class="fas fa-walking me-1"></i>Walk-in</span>
                             @endif
                         </td>
-                        <td>
+                        <td data-label="Status">
                             @php
                                 $statusColors = [
                                     'waiting' => 'bg-warning text-dark',
@@ -102,16 +144,17 @@
                             @endphp
                             <span class="badge {{ $statusColors[$queue->status] ?? 'bg-light text-dark' }}">{{ ucfirst($queue->status) }}</span>
                         </td>
-                        <td class="text-muted">{{ $queue->created_at->format('h:i A') }}</td>
-                        <td>
+                        <td class="text-muted" data-label="Time">{{ $queue->created_at->format('h:i A') }}</td>
+                        <td data-label="Actions">
                             <div class="btn-group btn-group-sm">
                                 <!-- View button for all -->
                                 <button class="btn btn-outline-secondary" onclick="viewDetails({{ $queue->id }})" title="View">
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 @if($queue->status === 'waiting')
-                                    <button class="btn btn-primary" onclick="callQueue({{ $queue->id }})" title="Call">
-                                        <i class="fas fa-phone"></i>
+                                    {{-- Notify Button --}}
+                                    <button class="btn btn-primary" onclick="callQueue({{ $queue->id }})" title="Notify via Email">
+                                        <i class="fas fa-envelope"></i>
                                     </button>
                                     <button class="btn btn-outline-danger" onclick="cancelQueue({{ $queue->id }})" title="Cancel">
                                         <i class="fas fa-times"></i>
@@ -170,12 +213,12 @@ function generateQR() {
 
 function callQueue(id) {
     Swal.fire({
-        title: 'Call Patient?',
-        text: 'This will announce the patient to the counter.',
+        title: 'Notify Patient?',
+        text: 'This will send an email notification to the patient.',
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#0d6efd',
-        confirmButtonText: '<i class="fas fa-phone me-1"></i> Call'
+        confirmButtonText: '<i class="fas fa-envelope me-1"></i> Send Email'
     }).then((result) => {
         if (result.isConfirmed) {
             fetch(`/staff/queue/${id}/call`, {
@@ -183,7 +226,7 @@ function callQueue(id) {
                 headers: { 'X-CSRF-TOKEN': csrfToken }
             }).then(r => r.json()).then(data => {
                 if (data.success) {
-                    Swal.fire({ icon: 'success', title: 'Patient Called!', timer: 1500, showConfirmButton: false })
+                    Swal.fire({ icon: 'success', title: 'Patient Notified!', timer: 1500, showConfirmButton: false })
                         .then(() => location.reload());
                 } else {
                     Swal.fire({ icon: 'error', title: 'Error', text: data.message });

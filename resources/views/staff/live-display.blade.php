@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.staff')
 
 @section('title', 'Live Monitor - Smart Healthcare')
 
@@ -10,7 +10,7 @@
             <span class="d-inline-block rounded-circle bg-success me-2" style="width: 10px; height: 10px; animation: pulse 2s infinite;"></span>
             Live Queue Monitor
         </h4>
-        <p class="text-muted small mb-0">Real-time queue status (Admin View)</p>
+        <p class="text-muted small mb-0">Real-time queue status (Staff View)</p>
     </div>
     <div class="d-flex align-items-center gap-3">
         <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 border border-success border-opacity-25 rounded-pill">
@@ -120,7 +120,7 @@
 @push('scripts')
 <script>
     function updateMonitor() {
-        fetch('{{ route("admin.api.live-queue") }}')
+        fetch('{{ route("staff.api.live-queue") }}')
             .then(r => r.json())
             .then(data => {
                 if (!data.success) return;

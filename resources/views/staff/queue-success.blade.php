@@ -1,6 +1,6 @@
 @extends('layouts.staff')
 
-@section('title', 'Ticket Created - HealthQueue')
+@section('title', 'Ticket Created - Smart Healthcare')
 
 @section('content')
 <div class="row justify-content-center">

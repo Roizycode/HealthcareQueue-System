@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Audit Logs - HealthQueue')
+@section('title', 'Audit Logs - Smart Healthcare')
 
 @section('content')
 <!-- Header -->

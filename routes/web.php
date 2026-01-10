@@ -57,7 +57,35 @@ Route::post('/administrator/login', [AuthController::class, 'adminLogin'])->name
 // Redirect /admin/login to /administrator/login for convenience
 Route::redirect('/admin/login', '/administrator/login');
 
+// Patient Login (separate from staff)
+Route::get('/patient/login', [AuthController::class, 'showPatientLogin'])->name('patient.login');
+Route::post('/patient/login', [AuthController::class, 'patientLogin'])->name('patient.login.submit');
+
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+// ==========================================
+// PATIENT ROUTES
+// ==========================================
+
+Route::prefix('patient')->name('patient.')->middleware(['auth', 'role:patient'])->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\PatientDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/appointments', [App\Http\Controllers\PatientDashboardController::class, 'appointments'])->name('appointments');
+    Route::get('/profile', [App\Http\Controllers\PatientDashboardController::class, 'profile'])->name('profile');
+    Route::put('/profile', [App\Http\Controllers\PatientDashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::get('/queue-status', [App\Http\Controllers\PatientDashboardController::class, 'getQueueStatus'])->name('queue-status');
+    Route::get('/check-queue', [App\Http\Controllers\PatientDashboardController::class, 'checkQueue'])->name('queue-check');
+    Route::get('/join-queue', [App\Http\Controllers\PatientDashboardController::class, 'joinQueueView'])->name('queue.join');
+    Route::post('/join-queue', [App\Http\Controllers\PatientDashboardController::class, 'joinQueueSubmit'])->name('queue.join.submit');
+    Route::get('/live-display', [App\Http\Controllers\PatientDashboardController::class, 'liveDisplay'])->name('live-display');
+    Route::get('/api/queue-data', [App\Http\Controllers\PatientDashboardController::class, 'getQueueData'])->name('api.queue-data');
+    Route::get('/api/dashboard-stats', [App\Http\Controllers\PatientDashboardController::class, 'getDashboardStats'])->name('api.dashboard-stats');
+    
+    // Appointment Request
+    Route::get('/request-appointment', [App\Http\Controllers\PatientDashboardController::class, 'requestAppointment'])->name('request-appointment');
+    Route::post('/request-appointment', [App\Http\Controllers\PatientDashboardController::class, 'submitAppointmentRequest'])->name('request-appointment.submit');
+    Route::get('/my-requests', [App\Http\Controllers\PatientDashboardController::class, 'myRequests'])->name('my-requests');
+    Route::post('/cancel-request/{id}', [App\Http\Controllers\PatientDashboardController::class, 'cancelRequest'])->name('cancel-request');
+});
 
 // ==========================================
 // ADMIN ROUTES
@@ -77,8 +105,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/payments', [AdminDashboardController::class, 'payments'])->name('payments');
     Route::get('/audit-logs', [AdminDashboardController::class, 'auditLogs'])->name('audit-logs');
     Route::get('/queue-settings', [AdminDashboardController::class, 'queueSettings'])->name('queue-settings');
+    Route::post('/queue-settings', [AdminDashboardController::class, 'updateQueueSettings'])->name('queue-settings.update');
     Route::post('/settings/queue', [AdminDashboardController::class, 'saveQueueSettings'])->name('settings.queue');
     Route::get('/reports', [AdminDashboardController::class, 'reports'])->name('reports');
+    Route::get('/reports/generate/{type}', [AdminDashboardController::class, 'generateReport'])->name('reports.generate');
     Route::get('/transactions', [AdminDashboardController::class, 'transactions'])->name('transactions');
     Route::get('/receipts', [AdminDashboardController::class, 'receipts'])->name('receipts');
 
@@ -86,6 +116,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/queue/live', [AdminDashboardController::class, 'liveQueue'])->name('queue.live');
     Route::get('/queue/priority', [AdminDashboardController::class, 'priorityQueue'])->name('queue.priority');
     Route::get('/queue/virtual', [AdminDashboardController::class, 'virtualQueue'])->name('queue.virtual');
+    Route::get('/api/live-queue', [AdminDashboardController::class, 'getLiveQueueData'])->name('api.live-queue');
 
     // Service Management
     Route::post('/services', [AdminDashboardController::class, 'storeService'])->name('services.store');
@@ -113,6 +144,8 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:admin,staff'])
     Route::get('/serving', [StaffDashboardController::class, 'getServingQueues'])->name('serving');
     Route::get('/queue/current', [StaffDashboardController::class, 'getCurrentServing'])->name('queue.current');
     Route::get('/queue/stats', [StaffDashboardController::class, 'quickStats'])->name('queue.stats');
+    Route::get('/live-display', [StaffDashboardController::class, 'liveDisplayPage'])->name('live-display');
+    Route::get('/api/live-queue', [StaffDashboardController::class, 'getLiveQueueData'])->name('api.live-queue');
 
     // Patient Management
     Route::post('/patients/register', [PatientController::class, 'walkInRegister'])->name('patients.register');
@@ -130,6 +163,7 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:admin,staff'])
     Route::post('/queue/{queue}/complete', [QueueController::class, 'complete'])->name('queue.complete');
     Route::post('/queue/{queue}/skip', [QueueController::class, 'skip'])->name('queue.skip');
     Route::post('/queue/{queue}/cancel', [QueueController::class, 'cancel'])->name('queue.cancel');
+    Route::put('/queue/{queue}', [QueueController::class, 'update'])->name('queue.update');
 
     // Service Queues
     Route::get('/service/{service}', [StaffDashboardController::class, 'serviceQueue'])->name('service.queue');
@@ -138,6 +172,11 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:admin,staff'])
     Route::get('/notifications', [StaffDashboardController::class, 'notifications'])->name('notifications');
     Route::get('/notifications/fetch', [StaffDashboardController::class, 'fetchNotifications'])->name('notifications.fetch');
     Route::get('/reports', [StaffDashboardController::class, 'reports'])->name('reports');
+
+    // Appointment Requests
+    Route::get('/appointment-requests', [StaffDashboardController::class, 'appointmentRequests'])->name('appointment-requests');
+    Route::post('/appointment-requests/{id}/approve', [StaffDashboardController::class, 'approveAppointment'])->name('appointment-requests.approve');
+    Route::post('/appointment-requests/{id}/reject', [StaffDashboardController::class, 'rejectAppointment'])->name('appointment-requests.reject');
 
     // Settings
     Route::get('/settings/staff', [StaffDashboardController::class, 'settingsStaff'])->name('settings.staff');

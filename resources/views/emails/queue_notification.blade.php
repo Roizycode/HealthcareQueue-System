@@ -42,12 +42,12 @@
                 </a>
             </div>
             
-            <p>Thank you for using HealthQueue!</p>
+            <p>Thank you for using Smart Healthcare!</p>
             
-            <p><strong>HealthQueue Team</strong></p>
+            <p><strong>Smart Healthcare Team</strong></p>
             
             <div style="margin-top: 30px; font-size: 12px; color: #666; border-top: 1px solid #eee; padding-top: 15px;">
-                Need help? Contact us at <a href="mailto:info@healthqueue.com" style="color: #F01E2C; text-decoration: none;">info@healthqueue.com</a> or call +1 (234) 567-8900
+                Need help? Contact us at <a href="mailto:info@Smart Healthcare.com" style="color: #F01E2C; text-decoration: none;">info@Smart Healthcare.com</a> or call +1 (234) 567-8900
             </div>
         </div>
     </div>

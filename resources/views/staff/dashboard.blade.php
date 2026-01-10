@@ -1,6 +1,6 @@
 @extends('layouts.staff')
 
-@section('title', 'Staff Dashboard - HealthQueue')
+@section('title', 'Staff Dashboard - Smart Healthcare')
 
 @section('content')
 <div class="row g-4">
@@ -579,284 +579,129 @@ function startService(id) {
                 Swal.showValidationMessage(`${error}`)
             })
         }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: 'Service Started!',
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false,
-                backdrop: true
-            }).then(() => {
-                location.reload(); 
-            });
-        }
-    }); 
-}
-
-function completeQueue(id) {
-    Swal.fire({
-        title: 'Complete Patient?',
-        text: "This will mark the patient as served.",
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#198754',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Yes, Complete',
-        showLoaderOnConfirm: true,
-        backdrop: true,
-        allowOutsideClick: () => !Swal.isLoading(),
-        preConfirm: () => {
-             return fetch(`/staff/queue/${id}/complete`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': window.csrfToken
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Service Started!',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        backdrop: true
+                    });
+                    // Refresh data instead of reload
+                    loadCurrentServing();
+                    loadStats();
+                    if(currentTab === 'waiting') loadQueue();
+                    else if(currentTab === 'serving') loadServing();
                 }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(response.statusText)
-                }
-                return response.json()
-            })
-            .then(data => {
-                if (!data.success) {
-                    throw new Error(data.message || "Failed");
-                }
-                return data;
-            })
-            .catch(error => {
-                Swal.showValidationMessage(
-                    `${error}`
-                )
-            })
+            }); 
         }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: 'Completed!',
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false,
-                backdrop: true
-            }).then(() => {
-                location.reload(); 
-            });
-        }
-    }); 
-}
 
-function skipQueue(id) {
-    Swal.fire({
-        title: 'Skip Patient?',
-        text: "Patient will be moved to skipped list.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ffc107',
-        cancelButtonColor: '#f8f9fa',
-        cancelButtonText: '<span class="text-dark">Cancel</span>',
-        confirmButtonText: 'Yes, Skip',
-        showLoaderOnConfirm: true,
-        backdrop: true,
-        preConfirm: () => {
-             return fetch(`/staff/queue/${id}/skip`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': window.csrfToken
-                }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error(response.statusText);
-                return response.json();
-            })
-            .then(data => {
-                if (!data.success) throw new Error(data.message || "Failed");
-                return data;
-            })
-            .catch(error => {
-                Swal.showValidationMessage(`${error}`);
-            })
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
+        function completeQueue(id) {
             Swal.fire({
-                title: 'Skipped',
-                text: 'Patient marked as skipped.',
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false,
-                backdrop: true
-            }).then(() => {
-                location.reload();
-            });
-        }
-    }); 
-}
-
-function selectCounter(counterId) {
-    const url = selectedQueueId ? `/staff/queue/${selectedQueueId}/call` : `/staff/queue/call-next`;
-    fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': window.csrfToken },
-        body: JSON.stringify({ counter_id: counterId })
-    })
-    .then(r => r.json())
-    .then(data => {
-        getModal('counterModal').hide();
-        
-        if (data.success) {
-            // Success - reload to show the called patient
-            location.reload();
-        } else {
-            // No patients available or error
-            Swal.fire({
-                icon: 'info',
-                title: 'No Patients Available',
-                text: data.message || 'There are currently no patients waiting in the queue.',
-                confirmButtonColor: '#0d6efd'
-            });
-        }
-    })
-    .catch(error => {
-        getModal('counterModal').hide();
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Failed to call next patient. Please try again.',
-            confirmButtonColor: '#dc3545'
-        });
-    });
-}
-
-function submitQuickRegister() {
-    const form = document.getElementById('quickRegisterForm');
-    const btn = form.querySelector('button[type="submit"]');
-    
-    if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-    }
-    
-    const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    
-    const formData = new FormData(form);
-    const phoneInput = document.getElementById('quick_phone_display').value;
-    formData.append('phone', '+63' + phoneInput);
-
-    fetch(form.action, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => response.json().then(data => ({ status: response.status, body: data })))
-    .then(({ status, body }) => {
-        if (status >= 200 && status < 300 && body.success) {
-            form.reset();
-            getModal('walkinModal').hide();
-            
-            const queueNumber = body.data.queue_number;
-            const patientName = body.data.patient_name;
-            const ticketUrl = `/queue/${queueNumber}/ticket`;
-            
-            Swal.fire({
-                title: 'Registration Successful!',
-                html: `
-                    <p class="text-muted small mb-4">Patient has been added to the queue.</p>
-                    <div class="bg-light p-3 rounded mb-4 text-center">
-                        <div class="small text-uppercase text-muted fw-bold">Queue Number</div>
-                        <h1 class="fw-bold display-4 mb-0 text-primary">${queueNumber}</h1>
-                        <div class="fw-medium text-dark mt-1">${patientName}</div>
-                    </div>
-                `,
-                icon: 'success',
+                title: 'Complete Patient?',
+                text: "This will mark the patient as served.",
+                icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Print Ticket',
-                cancelButtonText: 'Done',
-                confirmButtonColor: '#0d6efd',
+                confirmButtonColor: '#198754',
                 cancelButtonColor: '#6c757d',
-                reverseButtons: true,
+                confirmButtonText: 'Yes, Complete',
+                showLoaderOnConfirm: true,
                 backdrop: true,
-                allowOutsideClick: false,
-                customClass: {
-                    popup: 'swal2-no-animation',
-                    container: 'swal2-no-backdrop-animation'
-                },
-                showClass: {
-                    popup: 'swal2-show',
-                    backdrop: 'swal2-backdrop-show'
-                },
-                hideClass: {
-                    popup: 'swal2-hide',
-                    backdrop: 'swal2-backdrop-hide'
+                allowOutsideClick: () => !Swal.isLoading(),
+                preConfirm: () => {
+                     return fetch(`/staff/queue/${id}/complete`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': window.csrfToken
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(response.statusText)
+                        }
+                        return response.json()
+                    })
+                    .then(data => {
+                        if (!data.success) {
+                            throw new Error(data.message || "Failed");
+                        }
+                        return data;
+                    })
+                    .catch(error => {
+                        Swal.showValidationMessage(
+                            `${error}`
+                        )
+                    })
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.open(ticketUrl, '_blank', 'width=450,height=600');
+                    Swal.fire({
+                        title: 'Completed!',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        backdrop: true
+                    });
+                    // Refresh data instead of reload
+                    loadCurrentServing();
+                    loadStats();
+                    if(currentTab === 'completed') loadCompleted();
+                    else if(currentTab === 'serving') loadServing();
                 }
-                loadQueue();
-                loadStats();
-            });
-        } else {
-             Swal.fire({
-                icon: 'error',
-                title: 'Registration Failed',
-                text: body.message || 'Something went wrong.'
-            });
+            }); 
         }
-    })
-    .catch(error => {
-        console.error(error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'An unexpected error occurred.'
-        });
-    })
-    .finally(() => {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-    });
-}
 
-function recallQueue(id) {
-    fetch(`/staff/queue/${id}/recall`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': window.csrfToken
+        function skipQueue(id) {
+            Swal.fire({
+                title: 'Skip Patient?',
+                text: "Patient will be moved to skipped list.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ffc107',
+                cancelButtonColor: '#f8f9fa',
+                cancelButtonText: '<span class="text-dark">Cancel</span>',
+                confirmButtonText: 'Yes, Skip',
+                showLoaderOnConfirm: true,
+                backdrop: true,
+                preConfirm: () => {
+                     return fetch(`/staff/queue/${id}/skip`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': window.csrfToken
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error(response.statusText);
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (!data.success) throw new Error(data.message || "Failed");
+                        return data;
+                    })
+                    .catch(error => {
+                        Swal.showValidationMessage(`${error}`);
+                    })
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Skipped',
+                        text: 'Patient marked as skipped.',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        backdrop: true
+                    });
+                    // Refresh data instead of reload
+                    loadCurrentServing();
+                    loadStats();
+                    if(currentTab === 'waiting') loadQueue();
+                }
+            }); 
         }
-    })
-    .then(r => r.json())
-    .then(data => {
-        if(data.success) {
-            // Play notification sound and announce queue number
-            playRecallNotification(data.data?.queue_number || 'Patient');
-            
-             Swal.fire({
-                icon: 'success',
-                title: 'Recalled!',
-                text: data.message || 'Patient recalled successfully.',
-                timer: 1500,
-                showConfirmButton: false,
-                backdrop: true
-             });
-        } else {
-             Swal.fire({
-                icon: 'error',
-                title: 'Recall Failed',
-                text: data.message
-             });
-        }
-    })
-    .catch(e => console.error(e));
-}
 
 // Function to play recall notification with voice
 function playRecallNotification(queueNumber) {
@@ -877,6 +722,89 @@ function playRecallNotification(queueNumber) {
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(utterance);
     }
+}
+
+function recallQueue(id) {
+    fetch(`/staff/queue/${id}/recall`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': window.csrfToken
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.success) {
+            playRecallNotification(data.data?.queue_number || 'Patient');
+            
+             Swal.fire({
+                icon: 'success',
+                title: 'Recalled!',
+                text: data.message || 'Patient recalled successfully.',
+                timer: 1500,
+                showConfirmButton: false,
+                backdrop: true
+             });
+             // Refresh data
+             loadCurrentServing(); // In case we are recalling the current active patient
+             if(currentTab === 'serving') loadServing();
+        } else {
+             Swal.fire({
+                icon: 'error',
+                title: 'Recall Failed',
+                text: data.message
+             });
+        }
+    })
+    .catch(e => console.error(e));
+}
+
+function selectCounter(counterId) {
+    const url = selectedQueueId ? `/staff/queue/${selectedQueueId}/call` : `/staff/queue/call-next`;
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': window.csrfToken },
+        body: JSON.stringify({ counter_id: counterId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        getModal('counterModal').hide();
+        
+        if (data.success) {
+            // Updated to avoid reload
+            Swal.fire({
+                icon: 'success',
+                title: 'Calling Patient',
+                text: `Calling ${data.data.queue_number}`,
+                timer: 1500,
+                showConfirmButton: false,
+                backdrop: true
+            });
+            
+            // Refresh dashboard
+            loadCurrentServing();
+            loadStats();
+            if(currentTab === 'waiting') loadQueue();
+            else if(currentTab === 'serving') loadServing();
+            
+        } else {
+            Swal.fire({
+                icon: 'info',
+                title: 'No Patients Available',
+                text: data.message || 'There are currently no patients waiting in the queue.',
+                confirmButtonColor: '#0d6efd'
+            });
+        }
+    })
+    .catch(error => {
+        getModal('counterModal').hide();
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to call next patient. Please try again.',
+            confirmButtonColor: '#dc3545'
+        });
+    });
 }
 
 

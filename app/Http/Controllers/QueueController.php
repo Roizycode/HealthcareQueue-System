@@ -76,6 +76,16 @@ class QueueController extends Controller
                 dispatch(new \App\Jobs\NotifyPatientJob($queue, 'queue_called'));
             }
 
+            // Staff notification
+            if ($user = auth()->user()) {
+                $user->notify(new \App\Notifications\StaffAlert([
+                    'title' => 'Patient Called',
+                    'message' => "You called {$queue->queue_number} to {$counter->name}.",
+                    'type' => 'info',
+                    'icon' => 'fas fa-bullhorn'
+                ]));
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => "Calling {$queue->queue_number}",
@@ -255,6 +265,16 @@ class QueueController extends Controller
                  $queue->patient->notify(new \App\Notifications\QueueStatusUpdated($queue, 'payment_required'));
             }
 
+            // Staff notification
+            if ($user = auth()->user()) {
+                $user->notify(new \App\Notifications\StaffAlert([
+                    'title' => 'Service Completed',
+                    'message' => "You completed service for {$queue->queue_number}.",
+                    'type' => 'success',
+                    'icon' => 'fas fa-check-circle'
+                ]));
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => "Queue {$queue->queue_number} completed",
@@ -303,6 +323,25 @@ class QueueController extends Controller
                 'message' => $e->getMessage(),
             ], 422);
         }
+    }
+
+    /**
+     * Update queue details
+     */
+    public function update(Request $request, Queue $queue)
+    {
+        $validated = $request->validate([
+            'priority_id' => 'nullable|exists:priorities,id',
+            'status' => 'nullable|in:waiting,skipped,cancelled,completed,serving,called',
+        ]);
+
+        $queue->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Queue updated successfully',
+            'data' => $queue->load('priority'),
+        ]);
     }
 
     /**

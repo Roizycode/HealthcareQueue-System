@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'HealthQueue - Smart Healthcare Queue Management')
+@section('title', 'Smart Healthcare - Smart Healthcare Queue Management')
 @section('description', 'Reduce waiting time. Improve patient experience. Join queues online and get SMS notifications.')
 
 @section('content')
@@ -24,7 +24,7 @@
                 
                 <!-- Subtitle -->
                 <p class="lead mb-4 text-white opacity-90 mx-auto" style="font-size: 1.1rem; max-width: 700px;">
-                    HealthQueue is a modern virtual queue system designed for hospitals, clinics, and healthcare centers. 
+                    Smart Healthcare is a modern virtual queue system designed for hospitals, clinics, and healthcare centers. 
                     Patients can join queues remotely, monitor their status, and arrive exactly when they are needed.
                 </p>
                 
@@ -80,10 +80,10 @@
 
         <div class="row g-3">
             @foreach([
-                ['step' => '1', 'icon' => 'fa-mobile-alt', 'title' => 'Join Queue', 'desc' => 'Patients register online or through the reception desk.', 'color' => '#0D6EFD'],
-                ['step' => '2', 'icon' => 'fa-eye', 'title' => 'Wait Remotely', 'desc' => 'Track your queue position and estimated waiting time.', 'color' => '#20C997'],
-                ['step' => '3', 'icon' => 'fa-envelope', 'title' => 'Get Notified', 'desc' => 'Receive queue updates via email.', 'color' => '#FFC107'],
-                ['step' => '4', 'icon' => 'fa-check-circle', 'title' => 'Get Served', 'desc' => 'Proceed to counter and complete the process.', 'color' => '#198754'],
+                ['step' => '1', 'icon' => 'fa-user-nurse', 'title' => 'Visit Reception', 'desc' => 'Approach the reception desk for registration.', 'color' => '#0D6EFD'],
+                ['step' => '2', 'icon' => 'fa-clipboard-check', 'title' => 'Get Registered', 'desc' => 'Staff registers your details and assigns queue number.', 'color' => '#20C997'],
+                ['step' => '3', 'icon' => 'fa-bell', 'title' => 'Get Notified', 'desc' => 'Receive queue updates and notification when approved.', 'color' => '#FFC107'],
+                ['step' => '4', 'icon' => 'fa-check-circle', 'title' => 'Get Served', 'desc' => 'Proceed to counter when called for service.', 'color' => '#198754'],
             ] as $index => $item)
                 <div class="col-lg-3 col-md-6">
                     <div class="card card-healthcare h-100 text-center p-3 position-relative hover-scale">
@@ -193,15 +193,15 @@
             <span class="badge bg-white bg-opacity-25 px-3 py-1 rounded-pill mb-2 fw-semibold small">
                 <i class="fas fa-star me-1"></i> Key Features
             </span>
-            <h2 class="fs-2 fw-bold mb-2" style="font-family: 'Poppins', sans-serif;">Why Choose HealthQueue?</h2>
+            <h2 class="fs-2 fw-bold mb-2" style="font-family: 'Poppins', sans-serif;">Why Choose Smart Healthcare?</h2>
         </div>
 
         <div class="row g-3">
             @foreach([
-                ['icon' => 'fa-mobile-alt', 'title' => 'Virtual Queue System', 'desc' => 'Join queues online without physically lining up.'],
-                ['icon' => 'fa-envelope', 'title' => 'Email Notifications', 'desc' => 'Receive queue updates and ticket links via email.'],
+                ['icon' => 'fa-user-nurse', 'title' => 'Reception Registration', 'desc' => 'Staff-assisted registration ensures accurate patient information.'],
+                ['icon' => 'fa-envelope', 'title' => 'Email Notifications', 'desc' => 'Receive queue updates and approval notifications via email.'],
                 ['icon' => 'fa-chart-line', 'title' => 'Live Queue Tracking', 'desc' => 'Monitor queue status and current serving ticket in real time.'],
-                ['icon' => 'fa-clock', 'title' => 'Estimated Wait Time', 'desc' => 'Know approximately how long you need to wait.'],
+                ['icon' => 'fa-clock', 'title' => 'Appointment Scheduling', 'desc' => 'Staff schedules your appointment after registration approval.'],
                 ['icon' => 'fa-users', 'title' => 'Priority Handling', 'desc' => 'Dedicated lanes for Seniors, PWDs, and Emergency cases.'],
                 ['icon' => 'fa-desktop', 'title' => 'Multi-Counter Support', 'desc' => 'Automatically assigns available counters for faster service.'],
             ] as $feature)

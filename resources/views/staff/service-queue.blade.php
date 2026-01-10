@@ -1,6 +1,6 @@
 @extends('layouts.staff')
 
-@section('title', 'Queue - HealthQueue Staff')
+@section('title', 'Queue - Smart Healthcare Staff')
 
 @section('content')
 <div class="row g-4">

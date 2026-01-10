@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Reports - HealthQueue')
+@section('title', 'Reports - Smart Healthcare')
 
 @section('content')
 <!-- Header -->
@@ -176,6 +176,7 @@ function generateReport(type) {
         confirmButtonText: '<i class="fas fa-download me-1"></i> Generate'
     }).then((result) => {
         if (result.isConfirmed) {
+            window.open('/admin/reports/generate/' + type, '_blank');
             Swal.fire({ icon: 'success', title: 'Report Generated!', text: 'Download will start shortly', timer: 2000, showConfirmButton: false });
         }
     });

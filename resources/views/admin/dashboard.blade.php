@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Admin Dashboard - HealthQueue')
+@section('title', 'Admin Dashboard - Smart Healthcare')
 
 @section('content')
 <div class="row g-4">

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Staff Dashboard')</title>
+    <title>@yield('title', 'Patient Dashboard - Smart Healthcare')</title>
     <link rel="icon" type="image/png" href="{{ asset('image/Iconlogo.png') }}">
 
     <!-- Fonts -->
@@ -23,14 +23,16 @@
             background-color: #f8f9fa;
         }
 
-        /* Sidebar Variables */
+        /* Sidebar Variables - Patient Theme (Green/Teal) */
         :root {
             --sidebar-width: 260px;
             --sidebar-bg: #ffffff;
             --sidebar-border: #e9ecef;
             --sidebar-text: #495057;
-            --sidebar-active-bg: #e7f1ff;
-            --sidebar-active-text: #0d6efd;
+            --sidebar-active-bg: #d1fae5;
+            --sidebar-active-text: #059669;
+            --patient-primary: #20C997;
+            --patient-primary-dark: #059669;
         }
 
         #wrapper {
@@ -62,6 +64,10 @@
             align-items: center;
             gap: 0.75rem;
             border-bottom: 1px solid var(--sidebar-border);
+        }
+
+        .sidebar-brand i {
+            color: var(--patient-primary);
         }
 
         .sidebar-content {
@@ -108,11 +114,6 @@
             font-size: 1.1em;
         }
 
-        .nav-submenu .nav-link {
-            padding-left: 3.5rem;
-            font-size: 0.95em;
-        }
-
         /* Page Content */
         #page-content-wrapper {
             width: 100%;
@@ -121,35 +122,91 @@
             min-height: 100vh;
         }
 
-        /* User Profile in Sidebar Bottom */
+        /* User Profile in Sidebar */
+        .sidebar-user {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--sidebar-border);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--patient-primary) 0%, #0dcaf0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .sidebar-user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .sidebar-user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #212529;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-user-role {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+
+        /* Sidebar Footer */
         .sidebar-footer {
             padding: 1rem;
             border-top: 1px solid var(--sidebar-border);
         }
 
         /* Utilities */
-        /* Hide scrollbar globally but allow scrolling */
         ::-webkit-scrollbar {
             display: none;
-        }
-        .bg-purple {
-            background-color: #6f42c1 !important;
-            color: #ffffff !important;
         }
         * {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
 
-        .letter-spacing-1 { letter-spacing: 1px; }
-        .divide-x > * + * { border-left: 1px solid #dee2e6; }
-        
-        @media (max-width: 992px) {
-            #sidebar-wrapper { transform: translateX(-100%); transition: transform 0.3s ease; }
-            #sidebar-wrapper.show { transform: translateX(0); }
-            #page-content-wrapper { margin-left: 0; }
+        /* Patient Card Styling */
+        .patient-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s;
         }
-        
+
+        .patient-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            #sidebar-wrapper {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            #sidebar-wrapper.show {
+                transform: translateX(0);
+            }
+
+            #page-content-wrapper {
+                margin-left: 0;
+                padding: 1rem;
+            }
+        }
+
         /* Prevent Layout Shift - Robust Fix */
         html { overflow-y: scroll !important; }
         body { padding-right: 0 !important; }
@@ -175,66 +232,47 @@
             <div class="sidebar-content">
                 <!-- Main -->
                 <div class="nav-section-label pt-2">Main</div>
-                <a href="{{ route('staff.dashboard') }}" class="nav-link {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}">
+                <a href="{{ route('patient.dashboard') }}" class="nav-link {{ request()->routeIs('patient.dashboard') ? 'active' : '' }}">
                     <i class="fas fa-th-large"></i> 
                     <span>Dashboard</span>
                 </a>
 
-                <!-- Queue Management -->
-                <div class="nav-section-label">Queues</div>
-                <a href="{{ route('staff.live-display') }}" class="nav-link {{ request()->routeIs('staff.live-display') ? 'active' : '' }}">
-                    <i class="fas fa-desktop"></i>
+                <!-- Appointments -->
+                <div class="nav-section-label">Appointments</div>
+                <a href="{{ route('patient.request-appointment') }}" class="nav-link {{ request()->routeIs('patient.request-appointment') ? 'active' : '' }}">
+                    <i class="fas fa-calendar-plus"></i>
+                    <span>Request Appointment</span>
+                </a>
+                <a href="{{ route('patient.my-requests') }}" class="nav-link {{ request()->routeIs('patient.my-requests') ? 'active' : '' }}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>My Requests</span>
+                </a>
+                <a href="{{ route('patient.appointments') }}" class="nav-link {{ request()->routeIs('patient.appointments') ? 'active' : '' }}">
+                    <i class="fas fa-history"></i>
+                    <span>Appointment History</span>
+                </a>
+
+                <!-- Queue -->
+                <div class="nav-section-label">Queue</div>
+                <a href="{{ route('patient.queue.join') }}" class="nav-link {{ request()->routeIs('patient.queue.join') ? 'active' : '' }}">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Get Queue Number</span>
+                </a>
+                <a href="{{ route('patient.queue-check') }}" class="nav-link {{ request()->routeIs('patient.queue-check') ? 'active' : '' }}">
+                    <i class="fas fa-search-location"></i>
+                    <span>Check Queue Status</span>
+                </a>
+                <a href="{{ route('patient.live-display') }}" class="nav-link {{ request()->routeIs('patient.live-display') ? 'active' : '' }}">
+                    <i class="fas fa-tv"></i>
                     <span>Live Display</span>
                 </a>
-                <a href="/staff/queue/priority" class="nav-link {{ request()->is('staff/queue/priority') ? 'active' : '' }}">
-                    <i class="fas fa-layer-group"></i>
-                    <span>Priority Queue</span>
-                </a>
 
-                <!-- Patient Records -->
-                <div class="nav-section-label">Patients</div>
-                <a href="/staff/patients" class="nav-link {{ request()->is('staff/patients') ? 'active' : '' }}">
-                    <i class="fas fa-users"></i>
-                    <span>All Patients</span>
+                <!-- Account -->
+                <div class="nav-section-label">Account</div>
+                <a href="{{ route('patient.profile') }}" class="nav-link {{ request()->routeIs('patient.profile') ? 'active' : '' }}">
+                    <i class="fas fa-user-cog"></i>
+                    <span>My Profile</span>
                 </a>
-                <a href="/staff/patients/add" class="nav-link {{ request()->is('staff/patients/add') ? 'active' : '' }}">
-                    <i class="fas fa-user-plus"></i>
-                    <span>Add Patient</span>
-                </a>
-
-                <!-- Services -->
-                <div class="nav-section-label">Services</div>
-                @php $services = \App\Models\Service::active()->ordered()->get(); @endphp
-                @foreach($services as $svc)
-                <a href="/staff/service/{{ $svc->id }}" class="nav-link {{ request()->is('staff/service/'.$svc->id) ? 'active' : '' }}">
-                    <span class="rounded-circle d-inline-block border" style="width: 10px; height: 10px; background-color: {{ $svc->color }}; margin-left: 5px; margin-right: 5px;"></span>
-                    <span>{{ $svc->name }}</span>
-                </a>
-                @endforeach
-
-                <!-- Requests -->
-                <div class="nav-section-label">Requests</div>
-                @php $pendingCount = \App\Models\AppointmentRequest::pending()->count(); @endphp
-                <a href="/staff/appointment-requests" class="nav-link {{ request()->is('staff/appointment-requests') ? 'active' : '' }}">
-                    <i class="fas fa-calendar-check"></i>
-                    <span>Appointment Requests</span>
-                    @if($pendingCount > 0)
-                        <span class="badge bg-warning text-dark ms-auto">{{ $pendingCount }}</span>
-                    @endif
-                </a>
-
-                <!-- System -->
-                <div class="nav-section-label">System</div>
-                <a href="/staff/notifications" class="nav-link {{ request()->is('staff/notifications') ? 'active' : '' }}">
-                    <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
-                </a>
-                <a href="/staff/reports" class="nav-link {{ request()->is('staff/reports') ? 'active' : '' }}">
-                    <i class="fas fa-chart-pie"></i>
-                    <span>Reports</span>
-                </a>
-
-
             </div>
 
             <div class="sidebar-footer">
@@ -250,10 +288,10 @@
         <!-- Page Content -->
         <div id="page-content-wrapper">
             <!-- Mobile Toggle (Non-Floating) -->
-            <button class="btn btn-link text-dark d-lg-none m-3 p-0" id="mobile-sidebar-toggle" style="font-size: 1.5rem; text-decoration: none;">
+            <button class="btn btn-link text-dark d-lg-none mb-3 p-0" id="mobile-sidebar-toggle" style="font-size: 1.5rem; text-decoration: none;">
                 <i class="fas fa-bars"></i>
             </button>
-            @yield('content')
+             @yield('content')
         </div>
     </div>
     
@@ -274,7 +312,7 @@
                 icon: 'success',
                 title: 'Success',
                 text: "{{ session('success') }}",
-                confirmButtonColor: '#0D6EFD',
+                confirmButtonColor: '#20C997',
                 confirmButtonText: 'OK'
             });
         @endif
@@ -319,29 +357,6 @@
                     this.classList.add('d-none');
                 });
             }
-            
-            // Restore Sidebar Scroll Persistence
-            const mainContent = document.querySelector('#page-content-wrapper');
-            
-            // Disable browser auto scroll restoration
-            if ('scrollRestoration' in history) {
-                history.scrollRestoration = 'manual';
-            }
-            
-            // Restore scroll position on page load
-            const savedScrollPos = sessionStorage.getItem('staffScrollPos');
-            if (savedScrollPos && mainContent) {
-                mainContent.scrollTop = parseInt(savedScrollPos);
-            }
-            
-            // Save scroll position when clicking sidebar links
-            document.querySelectorAll('#sidebar-wrapper a').forEach(link => {
-                link.addEventListener('click', function() {
-                    if (mainContent) {
-                        sessionStorage.setItem('staffScrollPos', mainContent.scrollTop);
-                    }
-                });
-            });
         });
     </script>
     @stack('scripts')

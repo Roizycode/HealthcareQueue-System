@@ -101,15 +101,15 @@ class QueueStatusUpdated extends Notification
     protected function getSubject(): string
     {
         return match($this->type) {
-            'joined' => "[HealthQueue] Your Ticket {$this->queueModel->queue_number} is Ready",
-            'called' => "[HealthQueue] It's Your Turn! Ticket {$this->queueModel->queue_number}",
-            'serving' => "[HealthQueue] Service Started - {$this->queueModel->service->name}",
-            'completed' => "[HealthQueue] Service Completed",
-            'payment_required' => "[HealthQueue] Payment Required - {$this->queueModel->queue_number}",
-            'payment_successful' => "[HealthQueue] Payment Successful",
-            'next' => "[HealthQueue] You Are Next in Line",
-            'skipped' => "[HealthQueue] Queue Skipped - {$this->queueModel->queue_number}",
-            'cancelled' => "[HealthQueue] Queue Cancelled",
+            'joined' => "[Smart Healthcare] Your Ticket {$this->queueModel->queue_number} is Ready",
+            'called' => "[Smart Healthcare] It's Your Turn! Ticket {$this->queueModel->queue_number}",
+            'serving' => "[Smart Healthcare] Service Started - {$this->queueModel->service->name}",
+            'completed' => "[Smart Healthcare] Service Completed",
+            'payment_required' => "[Smart Healthcare] Payment Required - {$this->queueModel->queue_number}",
+            'payment_successful' => "[Smart Healthcare] Payment Successful",
+            'next' => "[Smart Healthcare] You Are Next in Line",
+            'skipped' => "[Smart Healthcare] Queue Skipped - {$this->queueModel->queue_number}",
+            'cancelled' => "[Smart Healthcare] Queue Cancelled",
             default => 'Queue Update',
         };
     }

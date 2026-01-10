@@ -1,16 +1,16 @@
 @extends('layouts.app')
 
-@section('title', 'Admin Login - Smart Healthcare')
+@section('title', 'Patient Login - Smart Healthcare')
 @section('hideHeader', true)
 @section('hideFooter', true)
 
 @section('content')
 <div class="login-wrapper">
-    <!-- Animated Background Elements (Matches Landing Page) -->
+    <!-- Animated Background Elements -->
     <div class="position-absolute w-100 h-100" style="overflow: hidden;">
-        <div class="position-absolute rounded-circle animate-float" style="width: 400px; height: 400px; background: rgba(255,255,255,0.05); top: -100px; right: -100px;"></div>
-        <div class="position-absolute rounded-circle animate-float" style="width: 250px; height: 250px; background: rgba(255,255,255,0.03); bottom: 50px; left: 5%; animation-delay: 1s;"></div>
-        <div class="position-absolute rounded-circle" style="width: 80px; height: 80px; background: rgba(255,255,255,0.05); bottom: 30%; left: 20%;"></div>
+        <div class="position-absolute rounded-circle animate-float" style="width: 400px; height: 400px; background: rgba(255,255,255,0.1); top: -100px; right: -100px;"></div>
+        <div class="position-absolute rounded-circle animate-float" style="width: 250px; height: 250px; background: rgba(255,255,255,0.08); bottom: 50px; left: 5%; animation-delay: 1s;"></div>
+        <div class="position-absolute rounded-circle" style="width: 80px; height: 80px; background: rgba(255,255,255,0.1); bottom: 30%; left: 20%;"></div>
     </div>
 
     <div class="container h-100 position-relative z-1 py-5">
@@ -23,15 +23,23 @@
                         
                         <!-- Brand Header -->
                         <div class="text-center mb-4">
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                 style="width: 70px; height: 70px; background: linear-gradient(135deg, #20C997 0%, #0dcaf0 100%);">
+                                <i class="fas fa-user-injured fa-xl text-white"></i>
+                            </div>
                             <h3 class="fw-bold text-dark mb-1" style="font-family: 'Poppins', sans-serif;">
-                                <i class="fas fa-user-shield text-primary me-2"></i>Admin Access
+                                Patient Portal
                             </h3>
-                            <p class="text-muted small">Secure login for administrators</p>
+                            <p class="text-muted small">Sign in to view your appointments and queue status</p>
                         </div>
 
-                        <!-- Alerts handled globally -->
+                        @if(session('error'))
+                            <div class="alert alert-danger py-2 small mb-3">
+                                <i class="fas fa-exclamation-circle me-1"></i>{{ session('error') }}
+                            </div>
+                        @endif
 
-                        <form method="POST" action="{{ route('admin.login.submit') }}">
+                        <form method="POST" action="{{ route('patient.login.submit') }}">
                             @csrf
 
                             <!-- Email Input -->
@@ -45,7 +53,7 @@
                                            name="email" 
                                            class="form-control border-start-0 ps-0 bg-light @error('email') is-invalid @enderror" 
                                            value="{{ old('email') }}"
-                                           placeholder="admin@smarthealthcare.com"
+                                           placeholder="your@email.com"
                                            style="height: 48px;"
                                            required 
                                            autofocus>
@@ -84,30 +92,38 @@
 
                             <!-- Submit Button -->
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-dark btn-lg rounded-pill fw-bold shadow-sm hover-lift" 
-                                        style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border: none;">
+                                <button type="submit" class="btn btn-lg rounded-pill fw-bold shadow-sm hover-lift" 
+                                        style="background: linear-gradient(135deg, #20C997 0%, #0dcaf0 100%); border: none; color: white;">
                                     Sign In <i class="fas fa-arrow-right ms-2"></i>
                                 </button>
                             </div>
 
-                            <!-- Back Link -->
-                            <div class="text-center mt-4">
-                                <a href="{{ route('home') }}" class="text-decoration-none small text-white opacity-75 hover-opacity-100">
-                                    <i class="fas fa-arrow-left me-1"></i> Return to Homepage
+                            <!-- Register Link -->
+                            <div class="text-center mt-4 pt-3 border-top">
+                                <p class="text-muted small mb-2">Don't have an account yet?</p>
+                                <a href="{{ route('register') }}" class="btn btn-outline-success rounded-pill px-4">
+                                    <i class="fas fa-user-plus me-1"></i> Create Patient Account
                                 </a>
                             </div>
-                            
-                            <!-- Staff Login Link -->
-                            <div class="text-center mt-2">
-                                <a href="{{ route('login') }}" class="text-decoration-none small text-white opacity-50 hover-opacity-100">
-                                    Not an Admin? Staff Login
+
+                            <!-- Back Link -->
+                            <div class="text-center mt-3">
+                                <a href="{{ route('home') }}" class="text-decoration-none small text-muted">
+                                    <i class="fas fa-arrow-left me-1"></i> Return to Homepage
                                 </a>
                             </div>
                         </form>
                     </div>
                 </div>
                 
-                <div class="text-center mt-3">
+                <!-- Staff Login Link -->
+                <div class="text-center mt-4">
+                    <a href="{{ route('login') }}" class="text-white small text-decoration-none opacity-75">
+                        <i class="fas fa-user-nurse me-1"></i> Staff Login
+                    </a>
+                </div>
+                
+                <div class="text-center mt-2">
                      <p class="text-white small opacity-50">&copy; {{ date('Y') }} Smart Healthcare System</p>
                 </div>
 
@@ -121,14 +137,13 @@
         min-height: 100vh;
         width: 100%;
         position: relative;
-        /* Verified Admin Dark Theme */
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        /* Patient-specific gradient (teal/green theme) */
+        background: linear-gradient(135deg, #20C997 0%, #0dcaf0 50%, #0D6EFD 100%);
         display: flex;
         align-items: center;
         justify-content: center;
     }
     
-    /* Hide scrollbar for standard browsers */
     body::-webkit-scrollbar { 
         display: none; 
     }
@@ -144,7 +159,7 @@
     .form-control:focus {
         box-shadow: none;
         background-color: #fff !important;
-        border-color: #334155;
+        border-color: #20C997;
     }
     
     .input-group-text {
@@ -157,11 +172,33 @@
     
     .hover-lift:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0,0,0, 0.4) !important;
+        box-shadow: 0 5px 15px rgba(32, 201, 151, 0.4) !important;
     }
     
-    .hover-opacity-100:hover {
-        opacity: 1 !important;
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    .animate-float {
+        animation: float 6s ease-in-out infinite;
     }
 </style>
+
+@push('scripts')
+@if(session('registered'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            title: 'Account Created!',
+            html: '<p class="mb-0">Your patient account has been created successfully.</p><p class="text-muted small mt-2">A welcome email has been sent to your inbox.</p>',
+            icon: 'success',
+            confirmButtonText: 'Login Now',
+            confirmButtonColor: '#20C997',
+            allowOutsideClick: false
+        });
+    });
+</script>
+@endif
+@endpush
 @endsection

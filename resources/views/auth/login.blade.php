@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Login - HealthQueue')
+@section('title', 'Login - Smart Healthcare')
 @section('hideHeader', true)
 @section('hideFooter', true)
 
@@ -24,9 +24,9 @@
                         <!-- Brand Header -->
                         <div class="text-center mb-4">
                             <h3 class="fw-bold text-dark mb-1" style="font-family: 'Poppins', sans-serif;">
-                                <i class="fas fa-hospital-user text-primary me-2"></i>Welcome Back
+                                <i class="fas fa-user-nurse text-primary me-2"></i>Staff Portal
                             </h3>
-                            <p class="text-muted small">Sign in to your dashboard</p>
+                            <p class="text-muted small">Sign in to manage queues and patients</p>
                         </div>
 
                         <form method="POST" action="{{ route('login') }}">
@@ -43,7 +43,7 @@
                                            name="email" 
                                            class="form-control border-start-0 ps-0 bg-light @error('email') is-invalid @enderror" 
                                            value="{{ old('email') }}"
-                                           placeholder="staff@healthqueue.com"
+                                           placeholder="staff@smarthealthcare.com"
                                            style="height: 48px;"
                                            required 
                                            autofocus>
@@ -84,13 +84,13 @@
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm hover-lift" 
                                         style="background: linear-gradient(135deg, #0D6EFD 0%, #0dcaf0 100%); border: none;">
-                                    Sign In
+                                    Sign In <i class="fas fa-arrow-right ms-2"></i>
                                 </button>
                             </div>
 
                             <!-- Back Link -->
                             <div class="text-center mt-4">
-                                <a href="{{ route('home') }}" class="text-decoration-none small text-white opacity-75 hover-opacity-100">
+                                <a href="{{ route('home') }}" class="text-decoration-none small text-muted">
                                     <i class="fas fa-arrow-left me-1"></i> Return to Homepage
                                 </a>
                             </div>
@@ -99,7 +99,7 @@
                 </div>
                 
                 <div class="text-center mt-3">
-                     <p class="text-white small opacity-50">&copy; {{ date('Y') }} HealthQueue System</p>
+                     <p class="text-white small opacity-50">&copy; {{ date('Y') }} Smart Healthcare System</p>
                 </div>
 
             </div>

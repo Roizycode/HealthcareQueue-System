@@ -275,6 +275,78 @@ class AdminDashboardController extends Controller
     }
 
     /**
+     * Generate Print-Friendly Report
+     */
+    public function generateReport($type)
+    {
+        $query = \App\Models\Queue::query();
+        $period = '';
+
+        switch ($type) {
+            case 'weekly':
+                $start = now()->startOfWeek();
+                $end = now()->endOfWeek();
+                $query->whereBetween('created_at', [$start, $end]);
+                $period = $start->format('M d') . ' - ' . $end->format('M d, Y');
+                break;
+            case 'monthly':
+                $start = now()->startOfMonth();
+                $end = now()->endOfMonth();
+                $query->whereBetween('created_at', [$start, $end]);
+                $period = $start->format('F Y');
+                break;
+            case 'daily':
+            default:
+                $query->whereDate('created_at', today());
+                $period = today()->format('F j, Y');
+                break;
+        }
+
+        // Fetch Data
+        $queues = $query->with(['service', 'staff', 'patient'])->get();
+
+        // Summary
+        $summary = [
+            'total' => $queues->count(),
+            'completed' => $queues->where('status', 'completed')->count(),
+            'cancelled' => $queues->whereIn('status', ['cancelled', 'skipped'])->count(),
+            'avg_wait' => 0,
+        ];
+
+        if ($summary['completed'] > 0) {
+            $completed = $queues->where('status', 'completed');
+            $avgWait = $completed->avg(function($q) {
+                return $q->called_at && $q->created_at ? $q->called_at->diffInMinutes($q->created_at) : 0;
+            });
+            $summary['avg_wait'] = round($avgWait);
+        }
+
+        // Service Stats
+        $serviceStats = $queues->groupBy('service_id')->map(function ($group) {
+            return (object) [
+                'service' => $group->first()->service,
+                'total' => $group->count(),
+                'completed' => $group->where('status', 'completed')->count(),
+                'avg_service_time' => $group->where('status', 'completed')->avg('service_duration'),
+            ];
+        });
+
+        // Staff Stats
+        $staffStats = $queues->whereNotNull('called_by')->groupBy('called_by')->map(function ($group) {
+            return (object) [
+                'staff' => $group->first()->staff,
+                'total_served' => $group->count(),
+                'avg_service_time' => $group->avg('service_duration'),
+            ];
+        });
+
+        // Detailed List (Limit 100)
+        $details = $queues->sortByDesc('created_at')->take(100);
+
+        return view('admin.reports_pdf', compact('type', 'period', 'summary', 'serviceStats', 'staffStats', 'details'));
+    }
+
+    /**
      * Display transactions page
      */
     public function transactions(Request $request): View
@@ -409,6 +481,44 @@ class AdminDashboardController extends Controller
     public function liveQueue(): View
     {
         return view('admin.queue.live');
+    }
+
+    /**
+     * Get live queue data (flat) for admin display
+     */
+    public function getLiveQueueData()
+    {
+        // Copied from StaffDashboardController for isolation
+        $nowServing = \App\Models\Queue::whereIn('status', ['serving', 'called'])
+            ->whereDate('created_at', today())
+            ->with(['service', 'counter'])
+            ->orderBy('called_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(fn($q) => [
+                'queue_number' => $q->queue_number,
+                'service' => $q->service->name,
+                'counter' => $q->counter?->name ?? 'Counter',
+                'status' => $q->status,
+            ]);
+        
+        $waiting = \App\Models\Queue::where('status', 'waiting')
+            ->whereDate('created_at', today())
+            ->with(['service'])
+            ->orderBy('created_at', 'asc')
+            ->limit(20)
+            ->get()
+            ->map(fn($q) => [
+                'queue_number' => $q->queue_number,
+                'service' => $q->service->name,
+            ]);
+            
+        return response()->json([
+            'success' => true,
+            'now_serving' => $nowServing,
+            'waiting' => $waiting,
+            'timestamp' => now()->format('H:i:s'),
+        ]);
     }
 
     /**

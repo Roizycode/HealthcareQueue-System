@@ -35,6 +35,13 @@ class QueueService
             throw new \Exception('Queue is currently full. Please try again later.');
         }
 
+        // Check Max Queue Size Daily
+        $maxDaily = (int) QueueSetting::get('max_queue_size', 200);
+        $currentTotal = Queue::whereDate('created_at', today())->count();
+        if ($currentTotal >= $maxDaily) {
+            throw new \Exception('Daily queue limit reached. Please try again tomorrow.');
+        }
+
         return DB::transaction(function () use ($patient, $service, $priority, $queueType, $reasonForVisit) {
             $queue = Queue::create([
                 'patient_id' => $patient->id,
@@ -121,13 +128,21 @@ class QueueService
 
             $queue->call($counter->id, $calledBy);
 
-            // Dispatch notification
+            // Dispatch notification (Safely)
             if ($queue->patient->sms_notifications) {
-                dispatch(new NotifyPatientJob($queue, 'queue_called'));
+                try {
+                    dispatch(new NotifyPatientJob($queue, 'queue_called'));
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::error('Notification failed: ' . $e->getMessage());
+                }
             }
 
             // Check and notify patients who are now near
-            $this->notifyNearPatients($queue->service);
+            try {
+                $this->notifyNearPatients($queue->service);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Near Notifications failed: ' . $e->getMessage());
+            }
 
             return $queue;
         });
@@ -150,7 +165,11 @@ class QueueService
 
         // Send notification again
         if ($queue->patient->sms_notifications) {
-            dispatch(new NotifyPatientJob($queue, 'queue_called'));
+            try {
+                dispatch(new NotifyPatientJob($queue, 'queue_called'));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Recall Notification failed: ' . $e->getMessage());
+            }
         }
 
         return $queue;
@@ -187,7 +206,11 @@ class QueueService
 
             // Dispatch completion notification
             if ($queue->patient->sms_notifications) {
-                dispatch(new NotifyPatientJob($queue, 'queue_completed'));
+                try {
+                    dispatch(new NotifyPatientJob($queue, 'queue_completed'));
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::error('Completion Notification failed: ' . $e->getMessage());
+                }
             }
 
             return $queue;
@@ -212,7 +235,11 @@ class QueueService
 
         // Notify patient of cancellation
         if ($queue->patient->sms_notifications) {
-            dispatch(new NotifyPatientJob($queue, 'queue_cancelled'));
+            try {
+                dispatch(new NotifyPatientJob($queue, 'queue_cancelled'));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Cancellation Notification failed: ' . $e->getMessage());
+            }
         }
 
         return $queue;
@@ -235,17 +262,25 @@ class QueueService
             $position = $queue->position;
 
             if ($position <= $threshold) {
-            // Notify via Web/Email
-            $queue->patient->notify(new \App\Notifications\QueueStatusUpdated($queue, 'next'));
+                // Notify via Web/Email
+                try {
+                    $queue->patient->notify(new \App\Notifications\QueueStatusUpdated($queue, 'next'));
+                } catch (\Throwable $e) {
+                     \Illuminate\Support\Facades\Log::error('Near Web Notification failed: ' . $e->getMessage());
+                }
 
-            // Notify via SMS if enabled
-            if ($queue->patient->sms_notifications) {
-                dispatch(new NotifyPatientJob($queue, 'queue_near'));
+                // Notify via SMS if enabled
+                if ($queue->patient->sms_notifications) {
+                    try {
+                        dispatch(new NotifyPatientJob($queue, 'queue_near'));
+                    } catch (\Throwable $e) {
+                         \Illuminate\Support\Facades\Log::error('Near SMS Notification failed: ' . $e->getMessage());
+                    }
+                }
+                
+                $queue->near_notification_sent = true;
+                $queue->save();
             }
-            
-            $queue->near_notification_sent = true;
-            $queue->save();
-        }
         }
     }
 
@@ -335,6 +370,7 @@ class QueueService
             ->join('priorities', 'queues.priority_id', '=', 'priorities.id')
             ->orderBy('priorities.level', 'desc')
             ->orderBy('queues.created_at', 'asc')
+            ->orderBy('queues.id', 'asc') // Stabilize sort
             ->select('queues.*')
             ->limit($limit)
             ->get();

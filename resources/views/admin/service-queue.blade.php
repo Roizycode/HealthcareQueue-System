@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Service Queue - HealthQueue')
+@section('title', 'Service Queue - Smart Healthcare')
 
 @section('content')
 <!-- Header -->
@@ -94,10 +94,10 @@
                         <td>
                         <td>
                             <div class="btn-group btn-group-sm">
-                                <button type="button" class="btn btn-outline-primary" title="View Details" onclick="viewQueueDetails({{ $queue->id }})">
+                                <button type="button" class="btn btn-outline-primary" title="View Details" onclick='viewQueueDetails(@json($queue))'>
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                <button type="button" class="btn btn-outline-warning" title="Edit Queue" onclick="editQueue({{ $queue->id }})">
+                                <button type="button" class="btn btn-outline-warning" title="Edit Queue" onclick='editQueue(@json($queue))'>
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <button type="button" class="btn btn-outline-danger" title="Delete Queue" onclick="deleteQueue({{ $queue->id }})">
@@ -123,42 +123,88 @@
 
 @push('scripts')
 <script>
-    function viewQueueDetails(id) {
+    const priorities = @json($priorities ?? []);
+
+    function viewQueueDetails(queue) {
+         let html = `
+            <div class="text-start p-3 bg-light rounded mt-2">
+                <p><strong>Patient:</strong> ${queue.patient.full_name}</p>
+                <p><strong>Service:</strong> ${queue.service?.name || '-'}</p>
+                <p><strong>Priority:</strong> ${queue.priority?.name || '-'}</p>
+                <p><strong>Status:</strong> <span class="badge bg-secondary">${queue.status.toUpperCase()}</span></p>
+                <p><strong>Time:</strong> ${new Date(queue.created_at).toLocaleTimeString()}</p>
+            </div>
+         `;
          Swal.fire({
-            title: 'Queue Details',
-            text: `Viewing details for Queue #${id}`,
-            icon: 'info'
+            title: `Queue #${queue.queue_number}`,
+            html: html,
+            confirmButtonText: 'Close'
          });
     }
 
-    function editQueue(id) {
+    function editQueue(queue) {
+        let options = {};
+        priorities.forEach(p => {
+             options[p.id] = p.name;
+        });
+
         Swal.fire({
-            title: 'Edit Queue',
-            text: 'Admin editing of active queue items is restricted to authorized personnel.',
-            icon: 'warning',
+            title: `Edit Queue #${queue.queue_number}`,
+            text: 'Update Priority Level',
+            input: 'select',
+            inputOptions: options,
+            inputValue: queue.priority_id,
             showCancelButton: true,
-            confirmButtonText: 'Proceed',
-            cancelButtonText: 'Cancel'
+            confirmButtonText: 'Update',
+            showLoaderOnConfirm: true,
+            preConfirm: (value) => {
+                return fetch(`/staff/queue/${queue.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': window.csrfToken
+                    },
+                    body: JSON.stringify({ priority_id: value })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(json => Promise.reject(json.message || 'Error'));
+                    }
+                    return response.json();
+                })
+                .catch(error => {
+                    Swal.showValidationMessage(`Request failed: ${error}`);
+                });
+            }
         }).then((result) => {
-             if (result.isConfirmed) {
-                 Swal.fire('Info', 'Edit functionality coming soon.', 'info');
-             }
+            if (result.isConfirmed) {
+                Swal.fire('Updated!', 'Queue priority updated.', 'success').then(() => location.reload());
+            }
         });
     }
 
     function deleteQueue(id) {
         Swal.fire({
             title: 'Delete Queue Item?',
-            text: "This will remove the patient from the queue completely.",
+            text: "This will remove the patient from the queue (Cancel).",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
             confirmButtonText: 'Yes, remove it'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Call delete endpoint
-                 Swal.fire('Deleted!', 'Queue item has been removed.', 'success');
-                 // location.reload();
+                fetch(`/staff/queue/${id}/cancel`, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': window.csrfToken }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if(data.success) {
+                        Swal.fire('Deleted!', 'Queue item has been removed.', 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                });
             }
         });
     }

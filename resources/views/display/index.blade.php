@@ -1,9 +1,12 @@
+@php
+    $theme = \App\Models\QueueSetting::get('display_theme', 'dark');
+@endphp
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="{{ $theme }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Queue Display - HealthQueue</title>
+    <title>Live Queue Display - Smart Healthcare</title>
     <link rel="icon" type="image/png" href="{{ asset('image/Iconlogo.png') }}">
     
     <!-- Fonts -->
@@ -39,8 +42,108 @@
             -ms-overflow-style: none;
         }
         
-        body::-webkit-scrollbar {
+        /* Light Theme Overrides */
+        html[data-theme="light"] body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        html[data-theme="light"] .logo,
+        html[data-theme="light"] .clock {
+            color: #1e293b;
+        }
+        
+        html[data-theme="light"] .date {
+            color: rgba(30, 41, 59, 0.7);
+        }
+        
+        /* Upcoming Section - Light Theme */
+        html[data-theme="light"] .upcoming-section {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        html[data-theme="light"] .upcoming-section .section-title {
+            color: #475569;
+        }
+        
+        html[data-theme="light"] .upcoming-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+        
+        html[data-theme="light"] .upcoming-item .position {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+        
+        html[data-theme="light"] .upcoming-item .queue-number {
+            color: #1e293b;
+        }
+        
+        html[data-theme="light"] .upcoming-item .service-name {
+            color: #64748b;
+        }
+        
+        html[data-theme="light"] .priority-regular {
+            background: #e2e8f0;
+            color: #475569;
+        }
+        
+        html[data-theme="light"] .announcement-banner {
+            background: rgba(255, 255, 255, 0.95);
+            border-top: 1px solid #e2e8f0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        }
+        
+        html[data-theme="light"] .announcement-icon {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        
+        html[data-theme="light"] .announcement-text {
+            color: #1e293b;
+        }
+        
+        /* Hide scrollbar globally */
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        *::-webkit-scrollbar {
             display: none;
+            width: 0;
+            height: 0;
+        }
+        
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* Back to Menu Link */
+        .back-to-menu {
+            pointer-events: auto;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: opacity 0.3s ease;
+        }
+        
+        .back-to-menu:hover {
+            opacity: 0.7;
+            color: white;
+        }
+        
+        html[data-theme="light"] .back-to-menu {
+            color: #1e293b;
+        }
+        
+        html[data-theme="light"] .back-to-menu:hover {
+            opacity: 0.7;
+            color: #1e293b;
         }
         
         /* Header removed, using absolute positioning for clock */
@@ -87,8 +190,13 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            overflow-y: auto;
-            scrollbar-width: none; /* Hide scrollbar for clean TV display */
+            overflow: hidden; /* No scrollbar at all */
+        }
+        
+        .now-serving-section::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            background: transparent;
         }
         
         .now-serving-section::before {
@@ -340,7 +448,7 @@
     <!-- Top Bar: Menu & Clock -->
     <div style="position: absolute; top: 0; left: 0; width: 100%; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: flex-start; z-index: 50; pointer-events: none;">
         <!-- Back Button (Text Only) -->
-        <a href="{{ url('/') }}" style="pointer-events: auto; color: white; text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#20C997'" onmouseout="this.style.color='white'">
+        <a href="{{ url('/') }}" class="back-to-menu">
             Back to Menu
         </a>
 
@@ -387,7 +495,7 @@
             <i class="fas fa-info-circle"></i>
         </div>
         <div class="announcement-text">
-            Welcome to HealthQueue! Please listen for your queue number and proceed to the designated counter when called. Thank you for your patience. &nbsp; • &nbsp; Senior citizens and PWDs have priority lanes. &nbsp; • &nbsp; For emergencies, please proceed directly to the Emergency Counter.
+            Welcome to Smart Healthcare! Please listen for your queue number and proceed to the designated counter when called. Thank you for your patience. &nbsp; • &nbsp; Senior citizens and PWDs have priority lanes. &nbsp; • &nbsp; For emergencies, please proceed directly to the Emergency Counter.
         </div>
     </div>
 
@@ -558,6 +666,8 @@
         }
         
         function cycleServing() {
+            // Cycle through pages of serving cards (6 per page)
+            // This only changes card content, not page scroll position
             if (servingQueueData.length === 0) return;
             
             const pageSize = 6;

@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Staff Management - HealthQueue')
+@section('title', 'Staff Management - Smart Healthcare')
 
 @section('content')
 <!-- Header -->
@@ -121,7 +121,7 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label small text-muted">Email Address</label>
-                            <input type="email" name="email" class="form-control" required>
+                            <input type="email" name="email" class="form-control" placeholder="staff@smarthealthcare.com" required>
                         </div>
                         <div class="col-6">
                             <label class="form-label small text-muted">Staff ID</label>

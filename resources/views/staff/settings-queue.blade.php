@@ -1,6 +1,6 @@
 @extends('layouts.staff')
 
-@section('title', 'Queue Settings - HealthQueue')
+@section('title', 'Queue Settings - Smart Healthcare')
 
 @section('content')
 <div class="mb-4">

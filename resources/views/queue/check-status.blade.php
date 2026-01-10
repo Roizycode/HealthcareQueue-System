@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Check Queue Status - HealthQueue')
+@section('title', 'Check Queue Status - Smart Healthcare')
 
 @section('content')
 <section class="py-5" style="min-height: 100vh; background: linear-gradient(135deg, #0D6EFD 0%, #0dcaf0 50%, #20C997 100%);">

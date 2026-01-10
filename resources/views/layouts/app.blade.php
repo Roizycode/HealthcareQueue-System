@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'HealthQueue - Smart Healthcare Queue Management')</title>
+    <title>@yield('title', 'Smart Healthcare - Smart Healthcare Queue Management')</title>
     <meta name="description" content="@yield('description', 'Modern Healthcare Queue Management System - Join queues online, track your position, and receive notifications')">
     <link rel="icon" type="image/png" href="{{ asset('image/Iconlogo.png') }}">
 
@@ -583,7 +583,7 @@
         <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}">
                 <i class="fas fa-hospital-user"></i>
-                HealthQueue
+                Smart Healthcare
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -634,7 +634,7 @@
                 <div class="col-lg-4">
                     <h5 class="mb-3">
                         <i class="fas fa-hospital-user me-2"></i>
-                        HealthQueue
+                        Smart Healthcare
                     </h5>
                     <p class="text-white-50 mb-3">
                         Smart Healthcare Queue Management System. 
@@ -666,14 +666,14 @@
                     <ul class="list-unstyled text-white-50">
                         <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> 123 Medical Center Drive</li>
                         <li class="mb-2"><i class="fas fa-phone me-2"></i> +1 (234) 567-8900</li>
-                        <li class="mb-2"><i class="fas fa-envelope me-2"></i> info@healthqueue.com</li>
+                        <li class="mb-2"><i class="fas fa-envelope me-2"></i> info@Smart Healthcare.com</li>
                         <li class="mb-2"><i class="fas fa-clock me-2"></i> Mon-Sun: 24/7</li>
                     </ul>
                 </div>
             </div>
             <hr class="my-4 border-secondary opacity-25">
             <div class="d-flex flex-wrap justify-content-between align-items-center">
-                <p class="text-white-50 small mb-0">&copy; {{ date('Y') }} HealthQueue. All rights reserved.</p>
+                <p class="text-white-50 small mb-0">&copy; {{ date('Y') }} Smart Healthcare. All rights reserved.</p>
                 <div class="d-flex gap-3">
                     <a href="#" class="text-white-50 small" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy Policy</a>
                     <a href="#" class="text-white-50 small" data-bs-toggle="modal" data-bs-target="#termsModal">Terms of Service</a>
@@ -692,7 +692,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Welcome to HealthQueue ("we," "our," or "us"). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our queue management system.</p>
+                    <p>Welcome to Smart Healthcare ("we," "our," or "us"). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our queue management system.</p>
                     
                     <h6 class="fw-bold mt-4">1. Information We Collect</h6>
                     <p class="small text-muted">We collect personal information that you voluntarily provide when you register for the queue service. This includes: Full Name, Phone Number, Email Address, and Health Priority Status (e.g., Senior, PWD).</p>
@@ -704,7 +704,7 @@
                     <p class="small text-muted">We use administrative, technical, and physical security measures to help protect your personal information.</p>
                     
                     <h6 class="fw-bold mt-3">4. Contact Us</h6>
-                    <p class="small text-muted">If you have questions or comments about this policy, you may email us at info@healthqueue.com.</p>
+                    <p class="small text-muted">If you have questions or comments about this policy, you may email us at info@Smart Healthcare.com.</p>
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Understood</button>
@@ -721,19 +721,19 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Please read these Terms of Service ("Terms") carefully before using the HealthQueue system.</p>
+                    <p>Please read these Terms of Service ("Terms") carefully before using the Smart Healthcare system.</p>
                     
                     <h6 class="fw-bold mt-4">1. Acceptance of Terms</h6>
                     <p class="small text-muted">By accessing or using our Service, you agree to be bound by these Terms. If you disagree with any part of the terms, then you may not use the Service.</p>
 
                     <h6 class="fw-bold mt-3">2. Use of the System</h6>
-                    <p class="small text-muted">The HealthQueue system is intended for legitimate patient queuing purposes only. misuse, abusive behavior, or attempt to manipulate the queue system is strictly prohibited.</p>
+                    <p class="small text-muted">The Smart Healthcare system is intended for legitimate patient queuing purposes only. misuse, abusive behavior, or attempt to manipulate the queue system is strictly prohibited.</p>
                     
                     <h6 class="fw-bold mt-3">3. Accuracy of Information</h6>
                     <p class="small text-muted">You agree to provide accurate, current, and complete information during the registration process. False information regarding priority status (e.g., claiming Senior Citizen status without proof) may result in denial of priority service.</p>
                     
                     <h6 class="fw-bold mt-3">4. Limitation of Liability</h6>
-                    <p class="small text-muted">HealthQueue is not liable for any delays in medical service or medical outcomes resulting from the use of the queue system.</p>
+                    <p class="small text-muted">Smart Healthcare is not liable for any delays in medical service or medical outcomes resulting from the use of the queue system.</p>
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal">I Agree</button>

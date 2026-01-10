@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Admin Dashboard - HealthQueue')</title>
+    <title>@yield('title', 'Admin Dashboard - Smart Healthcare')</title>
     <link rel="icon" type="image/png" href="{{ asset('image/Iconlogo.png') }}">
 
     <!-- Fonts -->
@@ -332,6 +332,22 @@
                 margin-left: 0;
             }
         }
+        
+        /* Scrollbar Styling - Hidden as per user request */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        html {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* Prevent Layout Shift */
+        body { padding-right: 0 !important; }
+        body.modal-open, body.swal2-shown {
+            padding-right: 0 !important;
+            overflow-y: scroll !important; /* Allow scroll but hidden */
+        }
     </style>
     @stack('styles')
 </head>
@@ -340,13 +356,16 @@
         <!-- Sidebar -->
         <nav id="sidebar-wrapper">
             <div class="sidebar-brand">
-                <div class="sidebar-brand-icon">
+                <div class="sidebar-brand-icon text-primary">
                     <i class="fas fa-hospital"></i>
                 </div>
                 <div class="sidebar-brand-text">
-                    HealthQueue
+                    Smart Healthcare
                     <small>Admin Panel</small>
                 </div>
+                <button class="btn btn-link text-dark d-lg-none p-0 ms-auto" id="internal-sidebar-toggle" style="font-size: 1.2rem;">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
 
             <div class="sidebar-content">
@@ -399,10 +418,9 @@
                     <i class="fas fa-mobile-alt"></i>
                     <span>Virtual Queue</span>
                 </a>
-                <a href="{{ route('display') }}" target="_blank" class="nav-link">
+                <a href="{{ route('admin.queue.live') }}" class="nav-link {{ request()->routeIs('admin.queue.live') ? 'active' : '' }}">
                     <i class="fas fa-desktop"></i>
                     <span>Display Screen</span>
-                    <i class="fas fa-external-link-alt ms-auto" style="font-size: 0.7rem; opacity: 0.5;"></i>
                 </a>
 
                 <!-- Queue Settings -->
@@ -476,9 +494,17 @@
 
         <!-- Page Content -->
         <div id="page-content-wrapper">
+            <!-- Mobile Toggle (Non-Floating) -->
+            <button class="btn btn-link text-dark d-lg-none m-3 p-0" id="mobile-sidebar-toggle" style="font-size: 1.5rem; text-decoration: none;">
+                <i class="fas fa-bars"></i>
+            </button>
             @yield('content')
         </div>
     </div>
+    
+    <!-- Mobile Toggle (Icon Only) -->
+    <!-- Sidebar Overlay -->
+    <div id="sidebar-overlay" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-none d-lg-none" style="z-index: 999; backdrop-filter: blur(2px);"></div>
     
     @stack('modals')
 
@@ -523,32 +549,60 @@
             });
         });
 
-        // Mobile sidebar toggle
+        // Sidebar Toggle Logic
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('sidebar-wrapper');
+            const toggles = document.querySelectorAll('#mobile-sidebar-toggle, #internal-sidebar-toggle');
+            const overlay = document.getElementById('sidebar-overlay');
             
-            // Add mobile menu button if needed
-            if (window.innerWidth <= 992) {
-                const menuBtn = document.createElement('button');
-                menuBtn.className = 'btn btn-dark position-fixed';
-                menuBtn.style.cssText = 'top: 1rem; left: 1rem; z-index: 1001; border-radius: 10px;';
-                menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
-                menuBtn.onclick = () => sidebar.classList.toggle('show');
-                document.body.appendChild(menuBtn);
-            }
-        });
-
-        // Persist Sidebar Scroll Position
-        document.addEventListener("DOMContentLoaded", function () {
-            const sidebar = document.querySelector('.sidebar-content');
-            if (sidebar) {
-                const pos = localStorage.getItem('admin-sidebar-scroll-pos');
-                if (pos) sidebar.scrollTop = pos;
+            function toggleSidebar() {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('d-none');
                 
-                sidebar.addEventListener('scroll', function() {
-                    localStorage.setItem('admin-sidebar-scroll-pos', sidebar.scrollTop);
+                const extBtn = document.getElementById('mobile-sidebar-toggle');
+                if(extBtn) {
+                    if(sidebar.classList.contains('show')) {
+                        extBtn.style.visibility = 'hidden';
+                    } else {
+                        extBtn.style.visibility = 'visible';
+                    }
+                }
+            }
+            
+            toggles.forEach(btn => {
+                if(btn) btn.addEventListener('click', toggleSidebar);
+            });
+            
+            if(overlay) {
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('show');
+                    this.classList.add('d-none');
                 });
             }
+            
+            // Restore Sidebar Scroll Persistence
+            const sidebarContent = document.querySelector('#sidebar-wrapper');
+            const mainContent = document.querySelector('#page-content-wrapper');
+            
+            // Disable browser auto scroll restoration
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
+            
+            // Restore scroll position on page load
+            const savedScrollPos = sessionStorage.getItem('adminScrollPos');
+            if (savedScrollPos && mainContent) {
+                mainContent.scrollTop = parseInt(savedScrollPos);
+            }
+            
+            // Save scroll position when clicking sidebar links
+            document.querySelectorAll('#sidebar-wrapper a').forEach(link => {
+                link.addEventListener('click', function() {
+                    if (mainContent) {
+                        sessionStorage.setItem('adminScrollPos', mainContent.scrollTop);
+                    }
+                });
+            });
         });
     </script>
     @stack('scripts')

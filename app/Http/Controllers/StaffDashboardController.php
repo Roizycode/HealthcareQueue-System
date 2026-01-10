@@ -70,6 +70,7 @@ class StaffDashboardController extends Controller
         $queues = $query->join('priorities', 'queues.priority_id', '=', 'priorities.id')
             ->orderBy('priorities.level', 'desc')
             ->orderBy('queues.created_at', 'asc')
+            ->orderBy('queues.id', 'asc')
             ->select('queues.*')
             ->limit(50)
             ->get();
@@ -271,7 +272,11 @@ class StaffDashboardController extends Controller
      */
     public function patients(Request $request): View
     {
-        $query = \App\Models\Patient::query();
+        $query = \App\Models\Patient::query()
+            ->withCount('queues')
+            ->with(['queues' => function($q) {
+                $q->orderBy('created_at', 'desc')->limit(5);
+            }]);
 
         if ($search = $request->input('search')) {
             $query->search($search);
@@ -454,5 +459,133 @@ class StaffDashboardController extends Controller
     public function settingsSms(): View
     {
         return view('staff.settings-sms');
+    }
+
+    /**
+     * Display appointment requests
+     */
+    public function appointmentRequests(): View
+    {
+        $pendingRequests = \App\Models\AppointmentRequest::with(['patient', 'service'])
+            ->where('status', 'pending')
+            ->orderBy('preferred_date', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->get();
+        
+        $handledRequests = \App\Models\AppointmentRequest::with(['patient', 'service', 'handler'])
+            ->whereIn('status', ['approved', 'rejected', 'cancelled'])
+            ->orderBy('handled_at', 'desc')
+            ->limit(20)
+            ->get();
+        
+        return view('staff.appointment-requests', compact('pendingRequests', 'handledRequests'));
+    }
+
+    /**
+     * Approve an appointment request
+     */
+    public function approveAppointment(Request $request, $id)
+    {
+        $appointmentRequest = \App\Models\AppointmentRequest::with(['patient.user', 'service'])->findOrFail($id);
+        
+        $validated = $request->validate([
+            'staff_notes' => 'nullable|string|max:500',
+        ]);
+        
+        $appointmentRequest->update([
+            'status' => 'approved',
+            'handled_by' => Auth::id(),
+            'staff_notes' => $validated['staff_notes'] ?? null,
+            'handled_at' => now(),
+        ]);
+        
+        // Send email notification to patient
+        try {
+            if ($appointmentRequest->patient->user) {
+                $appointmentRequest->patient->user->notify(
+                    new \App\Notifications\AppointmentRequestStatus($appointmentRequest, 'approved')
+                );
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send appointment approval email: ' . $e->getMessage());
+        }
+        
+        return back()->with('success', 'Appointment request approved. Patient has been notified via email.');
+    }
+
+    /**
+     * Reject an appointment request
+     */
+    public function rejectAppointment(Request $request, $id)
+    {
+        $appointmentRequest = \App\Models\AppointmentRequest::with(['patient.user', 'service'])->findOrFail($id);
+        
+        $validated = $request->validate([
+            'staff_notes' => 'required|string|max:500',
+        ]);
+        
+        $appointmentRequest->update([
+            'status' => 'rejected',
+            'handled_by' => Auth::id(),
+            'staff_notes' => $validated['staff_notes'],
+            'handled_at' => now(),
+        ]);
+        
+        // Send email notification to patient
+        try {
+            if ($appointmentRequest->patient->user) {
+                $appointmentRequest->patient->user->notify(
+                    new \App\Notifications\AppointmentRequestStatus($appointmentRequest, 'rejected')
+                );
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send appointment rejection email: ' . $e->getMessage());
+        }
+        
+        return back()->with('success', 'Appointment request rejected. Patient has been notified via email.');
+    }
+    public function liveDisplayPage()
+    {
+        return view('staff.live-display');
+    }
+
+    /**
+     * Get flat live queue data for staff display
+     */
+    public function getLiveQueueData()
+    {
+        // Get now serving
+        $nowServing = \App\Models\Queue::whereIn('status', ['serving', 'called'])
+            ->whereDate('created_at', today())
+            ->with(['service', 'counter'])
+            ->orderBy('called_at', 'desc')
+            ->limit(10) // Limit slightly higher for staff view
+            ->get()
+            ->map(fn($q) => [
+                'queue_number' => $q->queue_number,
+                'service' => $q->service->name,
+                'counter' => $q->counter?->name ?? 'Counter',
+                'status' => $q->status,
+                'patient_id' => $q->patient_id, // include for consistency
+            ]);
+        
+        // Get waiting
+        $waiting = \App\Models\Queue::where('status', 'waiting')
+            ->whereDate('created_at', today())
+            ->with(['service'])
+            ->orderBy('created_at', 'asc')
+            ->limit(20)
+            ->get()
+            ->map(fn($q) => [
+                'queue_number' => $q->queue_number,
+                'service' => $q->service->name,
+            ]);
+            
+        return response()->json([
+            'success' => true,
+            'now_serving' => $nowServing,
+            'waiting' => $waiting,
+            'timestamp' => now()->format('H:i:s'),
+        ]);
     }
 }

@@ -1,6 +1,6 @@
 @extends('layouts.staff')
 
-@section('title', 'Priority Queue - HealthQueue Staff')
+@section('title', 'Priority Queue - Smart Healthcare Staff')
 
 @section('content')
 <div class="mb-4 d-flex justify-content-between align-items-center">

@@ -1,175 +1,141 @@
-# HealthQueue - Healthcare Queue Management System
+# 🏥 Smart Healthcare Queue System
 
-A modern healthcare queue management system built with Laravel 12. Allows patients to join queues online, track their position in real-time, and receive SMS notifications when it's their turn.
+![License](https://img.shields.io/badge/license-MIT-blue.svg) ![Laravel](https://img.shields.io/badge/Laravel-12.0-red) ![PHP](https://img.shields.io/badge/PHP-8.2%2B-purple)
 
-## Features
+A next-generation queue management system designed for modern healthcare facilities. **Smart Healthcare Queue System (HCS)** streamliness patient flow, reduces waiting times, and enhances operational efficiency through real-time tracking, SMS notifications, and intelligent priority handling.
 
-- 🏥 **Multiple Services**: Consultation, Laboratory, Pharmacy, Radiology
-- 🔢 **Priority Queue**: Emergency, Senior Citizen, PWD, Regular priorities
-- 📱 **Virtual Queue**: Join queues online from anywhere
-- 📲 **SMS Notifications**: Get notified via Twilio when it's your turn
-- 📊 **Real-time Dashboard**: Live queue display and management
-- 👥 **Role-based Access**: Admin, Staff, and Patient roles
-- 📈 **Analytics**: Queue statistics and performance metrics
+---
 
-## Requirements
+## 🚀 Key Features
 
-- PHP 8.2+
-- Composer
-- MySQL / PostgreSQL / SQLite
-- Node.js & NPM (for frontend assets)
-- Redis (optional, for queue processing)
+### � Core Modules
+- **Dynamic Service Management**: Supports Consultation, Laboratory, Pharmacy, Radiology, and custom services.
+- **Intelligent Priority Engine**: Automated prioritization for Emergency (EMG), Senior Citizens (SRC), Persons with Disability (PWD), and Regular (REG) patients.
+- **Virtual Queueing**: Contactless, web-based check-in allowing patients to join the queue remotely.
+- **Smart Notifications**: Real-time updates via SMS (Twilio Integration) and Email when a patient's turn is approaching.
 
-## Installation
+### �️ Specialized Interfaces
+- **Admin Dashboard**: centralized control for services, counters, staff management, and analytics.
+- **Staff Dashboard**: Efficient patient calling, servicing, and status management.
+- **Live Display Board (TV Mode)**: Real-time, voice-announced queue updates designed for waiting area screens.
+- **Patient Portal**: Mobile-responsive status checker and digital ticketing.
 
-### 1. Clone the Repository
+### � Analytics & Reporting
+- **Real-time Metrics**: Live monitoring of waiting times, service speeds, and queue lengths.
+- **PDF Reports**: Generate Daily, Weekly, and Monthly performance reports.
+- **Audit Logs**: Comprehensive activity tracking for security and accountability.
 
+---
+
+## 🛠️ System Requirements
+
+- **PHP**: ^8.2
+- **Database**: MySQL 8.0+ or PostgreSQL 13+ (SQLite supported for dev)
+- **Web Server**: Nginx or Apache
+- **Composer**: ^2.0
+- **Node.js**: ^18.0 & NPM
+
+---
+
+## 📦 Installation Guide
+
+### 1. Clone & Setup
 ```bash
-git clone <repository-url>
-cd HCS
-```
+git clone https://github.com/your-org/healthcare-queue-system.git
+cd healthcare-queue-system
 
-### 2. Install Dependencies
-
-```bash
+# Install PHP dependencies
 composer install
-npm install
+
+# Install Frontend dependencies
+npm install && npm run build
 ```
 
-### 3. Environment Setup
-
+### 2. Configuration
+Copy the environment file and configure your database and Twilio credentials.
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-### 4. Configure Database
-
-Edit `.env` file and set your database credentials:
-
+**Required .env configurations:**
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
-DB_PORT=3306
 DB_DATABASE=healthqueue
-DB_USERNAME=root
-DB_PASSWORD=
+
+# SMS Notifications (Optional)
+TWILIO_SID=your_sid
+TWILIO_AUTH_TOKEN=your_token
+TWILIO_FROM=your_number
 ```
 
-Or use SQLite (default):
-
-```env
-DB_CONNECTION=sqlite
-```
-
-### 5. Run Migrations & Seed Database
-
+### 3. Database Initialization
 ```bash
 php artisan migrate:fresh --seed
 ```
 
-### 6. Start the Application
-
+### 4. Application Launch
 ```bash
+# Start Development Server
 php artisan serve
-```
 
-Visit: http://127.0.0.1:8000
-
-## Demo Credentials
-
-| Role  | Email                      | Password |
-|-------|----------------------------|----------|
-| Admin | admin@healthqueue.com      | password |
-| Staff | staff@healthqueue.com      | password |
-
-## SMS Configuration (Twilio)
-
-To enable SMS notifications, configure Twilio in your `.env`:
-
-```env
-TWILIO_SID=your_twilio_sid
-TWILIO_AUTH_TOKEN=your_twilio_auth_token
-TWILIO_PHONE_NUMBER=+1234567890
-TWILIO_ENABLED=true
-```
-
-## Queue Worker
-
-For background job processing (SMS notifications):
-
-```bash
+# In a separate terminal, run Queue Worker for SMS/Email jobs
 php artisan queue:work
 ```
 
-## Scheduler
+Access the application at: `http://127.0.0.1:8000`
 
-For automatic queue escalation checks:
+---
 
-```bash
-php artisan schedule:run
-```
+## 🔐 Default Credentials
 
-Or add to crontab:
-```
-* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
-```
+| Role | Email | Password | Access Level |
+|------|-------|----------|--------------|
+| **Administrator** | `admin@smarthealthcare.com` | `password` | Full System Access |
+| **Staff** | `staff@smarthealthcare.com` | `password` | Queue & Patient Management |
 
-## Directory Structure
+> **Note:** For security, please change these credentials immediately after deployment.
+
+---
+
+## 📂 Project Architecture
 
 ```
 app/
-├── Http/
-│   ├── Controllers/
-│   │   ├── AdminDashboardController.php
-│   │   ├── StaffDashboardController.php
-│   │   ├── QueueController.php
-│   │   ├── PatientController.php
-│   │   └── HomeController.php
-│   └── Middleware/
-│       └── CheckRole.php
-├── Models/
-│   ├── User.php
-│   ├── Service.php
-│   ├── Priority.php
-│   ├── Patient.php
-│   ├── Queue.php
-│   ├── Counter.php
-│   └── NotificationLog.php
-├── Services/
-│   ├── QueueService.php
-│   └── SmsService.php
-└── Jobs/
-    ├── NotifyPatientJob.php
-    └── CheckEscalationsJob.php
+├── Http/Controllers/       # Request handling logic
+├── Services/              # Business logic isolation (QueueService, SmsService)
+├── Models/                # Eloquent ORM definitions
+├── Events/ & Listeners/   # Real-time event broadcasting
+└── Notifications/         # Multi-channel notification classes (SMS, Email, Database)
+
+resources/
+├── views/
+│   ├── admin/             # Administration views
+│   ├── staff/             # Staff operational views
+│   ├── patient/           # Public facing views
+│   ├── display/           # Public TV display views
+│   └── layouts/           # Shared blade templates
 ```
 
-## Key Routes
+---
 
-| Route | Description |
-|-------|-------------|
-| `/` | Landing page |
-| `/join-queue` | Virtual queue registration |
-| `/check-status` | Check queue status |
-| `/display` | Live queue display screen |
-| `/admin` | Admin dashboard |
-| `/staff` | Staff dashboard |
-| `/login` | Authentication |
+## 🔄 Workflow
 
-## API Endpoints
+1.  **Patient Check-in**: Patient registers via Reception, Kiosk, or Mobile Web.
+2.  **Assignment**: Smart algorithm assigns Queue Number (e.g., `CON-001`) based on Service & Priority.
+3.  **Waiting**: Patient waits; status visible on TV Display and Mobile status page.
+4.  **Notification**: System sends SMS when patient is "Next" or "Called".
+5.  **Service**: Staff calls patient -> status updates to "Serving".
+6.  **Completion**: Service ends -> status updates to "Completed".
+7.  **Reporting**: Data logged for daily performance reports.
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/services` | List services |
-| GET | `/api/v1/queue/{queue}/status` | Get queue status |
-| POST | `/api/v1/queue/join` | Join queue |
-| POST | `/staff/queue/service/{id}/call-next` | Call next patient |
-| POST | `/staff/queue/{id}/complete` | Complete queue |
+---
 
-## License
+## 📄 License
 
-MIT License
+This software is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-## Support
+---
 
-For issues and questions, please open a GitHub issue.
+© 2026 **Smart Healthcare Systems**. All rights reserved.

@@ -1,6 +1,6 @@
 @extends('layouts.staff')
 
-@section('title', 'All Patients - HealthQueue Staff')
+@section('title', 'All Patients - Smart Healthcare Staff')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -39,6 +39,7 @@
                         <th class="ps-4 border-bottom-0">Patient</th>
                         <th class="border-bottom-0">Contact</th>
                         <th class="border-bottom-0 text-center">Category</th>
+                        <th class="border-bottom-0 text-center">Previous Visits</th>
                         <th class="border-bottom-0 text-center">Last Visit</th>
                         <th class="text-end pe-4 border-bottom-0">Action</th>
                     </tr>
@@ -52,8 +53,15 @@
                                     {{ substr($patient->first_name, 0, 1) }}{{ substr($patient->last_name, 0, 1) }}
                                 </div>
                                 <div>
-                                    <div class="fw-bold text-dark">{{ $patient->full_name }}</div>
-                                    <small class="text-muted">ID: {{ $patient->id }}</small>
+                                    <div class="fw-bold text-dark">
+                                        {{ $patient->full_name }}
+                                        @if($patient->queues_count > 0)
+                                            <span class="badge bg-success bg-opacity-10 text-success ms-1" title="Returning Patient">
+                                                <i class="fas fa-check-circle"></i>
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <small class="text-muted">ID: {{ $patient->patient_id ?? $patient->id }}</small>
                                 </div>
                             </div>
                         </td>
@@ -70,8 +78,17 @@
                             <span class="badge bg-light text-muted border">Regular</span>
                             @endif
                         </td>
+                        <td class="text-center">
+                            @if($patient->queues_count > 0)
+                                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                                    <i class="fas fa-history me-1"></i>{{ $patient->queues_count }} visit{{ $patient->queues_count > 1 ? 's' : '' }}
+                                </span>
+                            @else
+                                <span class="badge bg-light text-muted border">New Patient</span>
+                            @endif
+                        </td>
                         <td class="text-muted small text-center">
-                            {{ $patient->queues->last() ? $patient->queues->last()->created_at->format('M d, Y') : '-' }}
+                            {{ $patient->queues->first() ? $patient->queues->first()->created_at->format('M d, Y') : '-' }}
                         </td>
                         <td class="text-end pe-4">
                             <button class="btn btn-sm btn-outline-secondary" onclick="viewPatient({{ json_encode($patient) }})">
@@ -81,7 +98,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">
+                        <td colspan="6" class="text-center py-5 text-muted">
                             <i class="fas fa-users-slash mb-2"></i>
                             <p class="mb-0">No patients found</p>
                         </td>
@@ -177,40 +194,62 @@
 
 <!-- View Patient Modal -->
 <div class="modal fade" id="viewPatientModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold">Patient Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-4 text-center">
-                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3 text-secondary fw-bold fs-3 border" style="width: 80px; height: 80px;" id="viewPatientInitials">
-                    -
-                </div>
-                <h4 class="fw-bold mb-1" id="viewPatientName">-</h4>
-                <p class="text-muted small mb-4" id="viewPatientId">-</p>
+            <div class="modal-body p-4">
+                <div class="row">
+                    <!-- Left Column: Patient Info -->
+                    <div class="col-md-5 text-center border-end">
+                        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3 text-secondary fw-bold fs-3 border" style="width: 80px; height: 80px;" id="viewPatientInitials">
+                            -
+                        </div>
+                        <h4 class="fw-bold mb-1" id="viewPatientName">-</h4>
+                        <p class="text-muted small mb-2" id="viewPatientId">-</p>
+                        <div id="viewPatientVisitBadge" class="mb-3"></div>
 
-                <div class="row g-3 text-start">
-                    <div class="col-6">
-                        <label class="small text-muted text-uppercase fw-bold">Phone</label>
-                        <div class="fw-medium" id="viewPatientPhone">-</div>
+                        <div class="row g-3 text-start">
+                            <div class="col-6">
+                                <label class="small text-muted text-uppercase fw-bold">Phone</label>
+                                <div class="fw-medium small" id="viewPatientPhone">-</div>
+                            </div>
+                            <div class="col-6">
+                                <label class="small text-muted text-uppercase fw-bold">Email</label>
+                                <div class="fw-medium small text-break" id="viewPatientEmail">-</div>
+                            </div>
+                            <div class="col-6">
+                                <label class="small text-muted text-uppercase fw-bold">Category</label>
+                                <div id="viewPatientStatus">-</div>
+                            </div>
+                            <div class="col-6">
+                                <label class="small text-muted text-uppercase fw-bold">Registered</label>
+                                <div class="fw-medium small" id="viewPatientDate">-</div>
+                            </div>
+                        </div>
                     </div>
-                     <div class="col-6">
-                        <label class="small text-muted text-uppercase fw-bold">Email</label>
-                        <div class="fw-medium text-break" id="viewPatientEmail">-</div>
-                    </div>
-                     <div class="col-6">
-                        <label class="small text-muted text-uppercase fw-bold">Status</label>
-                        <div id="viewPatientStatus">-</div>
-                    </div>
-                     <div class="col-6">
-                        <label class="small text-muted text-uppercase fw-bold">Registered</label>
-                        <div class="fw-medium" id="viewPatientDate">-</div>
+
+                    <!-- Right Column: Visit History -->
+                    <div class="col-md-7">
+                        <h6 class="fw-bold mb-3">
+                            <i class="fas fa-history text-primary me-2"></i>Visit History
+                        </h6>
+                        <div id="viewPatientHistory">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-clipboard-list fa-2x mb-2"></i>
+                                <p class="mb-0 small">No previous visits</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer border-0">
-                <button type="button" class="btn btn-light w-100" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="createAppointmentForPatient()">
+                    <i class="fas fa-plus-circle me-1"></i> Create Appointment
+                </button>
             </div>
         </div>
     </div>
@@ -221,24 +260,101 @@
 
 @push('scripts')
 <script>
+    let currentPatientId = null;
+
     // View Patient Details
     function viewPatient(patient) {
         const modal = new bootstrap.Modal(document.getElementById('viewPatientModal'));
+        currentPatientId = patient.id;
         
         document.getElementById('viewPatientInitials').textContent = (patient.first_name[0] + patient.last_name[0]).toUpperCase();
         document.getElementById('viewPatientName').textContent = patient.first_name + ' ' + patient.last_name;
-        document.getElementById('viewPatientId').textContent = 'ID: ' + patient.id;
+        document.getElementById('viewPatientId').textContent = 'ID: ' + (patient.patient_id || patient.id);
         document.getElementById('viewPatientPhone').textContent = patient.phone || '-';
         document.getElementById('viewPatientEmail').textContent = patient.email || '-';
         document.getElementById('viewPatientDate').textContent = new Date(patient.created_at).toLocaleDateString();
         
+        // Category/Status badges
         let statusHtml = '';
         if(patient.is_senior) statusHtml += '<span class="badge bg-secondary me-1">Senior</span>';
         if(patient.is_pwd) statusHtml += '<span class="badge bg-secondary me-1">PWD</span>';
         if(!patient.is_senior && !patient.is_pwd) statusHtml += '<span class="badge bg-light text-dark border">Regular</span>';
         document.getElementById('viewPatientStatus').innerHTML = statusHtml;
 
+        // Visit count badge
+        const visitCount = patient.queues_count || 0;
+        let visitBadgeHtml = '';
+        if (visitCount > 0) {
+            visitBadgeHtml = `
+                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">
+                    <i class="fas fa-check-circle me-1"></i> Returning Patient (${visitCount} visit${visitCount > 1 ? 's' : ''})
+                </span>
+            `;
+        } else {
+            visitBadgeHtml = '<span class="badge bg-info bg-opacity-10 text-info px-3 py-2"><i class="fas fa-user-plus me-1"></i> New Patient</span>';
+        }
+        document.getElementById('viewPatientVisitBadge').innerHTML = visitBadgeHtml;
+
+        // Visit history
+        const historyContainer = document.getElementById('viewPatientHistory');
+        if (patient.queues && patient.queues.length > 0) {
+            let historyHtml = '<div class="list-group list-group-flush">';
+            patient.queues.forEach((queue, index) => {
+                const date = new Date(queue.created_at);
+                const statusClass = queue.status === 'completed' ? 'success' : 
+                                   queue.status === 'cancelled' ? 'danger' : 
+                                   queue.status === 'skipped' ? 'warning' : 'primary';
+                historyHtml += `
+                    <div class="list-group-item px-0 py-2 border-0 ${index > 0 ? 'border-top' : ''}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="fw-bold text-primary">${queue.queue_number}</span>
+                                <span class="text-muted small ms-2">${date.toLocaleDateString()}</span>
+                            </div>
+                            <span class="badge bg-${statusClass} bg-opacity-10 text-${statusClass}">${queue.status}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            historyHtml += '</div>';
+            historyContainer.innerHTML = historyHtml;
+        } else {
+            historyContainer.innerHTML = `
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-clipboard-list fa-2x mb-2"></i>
+                    <p class="mb-0 small">No previous visits</p>
+                </div>
+            `;
+        }
+
         modal.show();
+    }
+
+    // Create appointment for current patient
+    function createAppointmentForPatient() {
+        if (!currentPatientId) {
+            Swal.fire('Error', 'No patient selected.', 'error');
+            return;
+        }
+        
+        // Close view modal and open add modal with patient pre-filled
+        const viewModal = bootstrap.Modal.getInstance(document.getElementById('viewPatientModal'));
+        viewModal.hide();
+        
+        // Redirect to add patient page with existing patient ID
+        Swal.fire({
+            title: 'Create New Appointment',
+            text: 'This will create a new queue entry for this returning patient.',
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'Create Appointment',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#0d6efd'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `{{ route('staff.patients.add') }}?patient_id=${currentPatientId}`;
+            }
+        });
     }
 
     // Handle Add Patient Form Submission

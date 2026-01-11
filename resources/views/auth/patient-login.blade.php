@@ -88,13 +88,16 @@
                                     <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
                                     <label class="form-check-label small text-muted" for="remember">Keep me signed in</label>
                                 </div>
+                                <a href="{{ route('patient.forgot-password') }}" class="small text-decoration-none" style="color: #20C997;">
+                                    Forgot Password?
+                                </a>
                             </div>
 
                             <!-- Submit Button -->
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-lg rounded-pill fw-bold shadow-sm hover-lift" 
                                         style="background: linear-gradient(135deg, #20C997 0%, #0dcaf0 100%); border: none; color: white;">
-                                    Sign In <i class="fas fa-arrow-right ms-2"></i>
+                                    Sign In
                                 </button>
                             </div>
 
@@ -109,19 +112,15 @@
                             <!-- Back Link -->
                             <div class="text-center mt-3">
                                 <a href="{{ route('home') }}" class="text-decoration-none small text-muted">
-                                    <i class="fas fa-arrow-left me-1"></i> Return to Homepage
+                                    Return to Homepage
                                 </a>
                             </div>
                         </form>
                     </div>
                 </div>
                 
-                <!-- Staff Login Link -->
-                <div class="text-center mt-4">
-                    <a href="{{ route('login') }}" class="text-white small text-decoration-none opacity-75">
-                        <i class="fas fa-user-nurse me-1"></i> Staff Login
-                    </a>
-                </div>
+                
+
                 
                 <div class="text-center mt-2">
                      <p class="text-white small opacity-50">&copy; {{ date('Y') }} Smart Healthcare System</p>

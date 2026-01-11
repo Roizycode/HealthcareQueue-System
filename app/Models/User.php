@@ -27,6 +27,9 @@ class User extends Authenticatable
         'is_active',
         'avatar',
         'last_login_at',
+        'verification_code',
+        'verification_code_expires_at',
+        'is_verified',
     ];
 
     /**
@@ -47,6 +50,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
+            'verification_code_expires_at' => 'datetime',
+            'is_verified' => 'boolean',
         ];
     }
 
@@ -177,5 +182,47 @@ class User extends Authenticatable
             $initials .= strtoupper(substr($name, 0, 1));
         }
         return $initials;
+    }
+
+    /**
+     * Generate and set a verification code
+     */
+    public function generateVerificationCode(): string
+    {
+        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $this->verification_code = $code;
+        $this->verification_code_expires_at = now()->addMinutes(15);
+        $this->save();
+        return $code;
+    }
+
+    /**
+     * Check if verification code is valid
+     */
+    public function isVerificationCodeValid(string $code): bool
+    {
+        return $this->verification_code === $code 
+            && $this->verification_code_expires_at 
+            && $this->verification_code_expires_at->isFuture();
+    }
+
+    /**
+     * Mark user as verified
+     */
+    public function markAsVerified(): void
+    {
+        $this->is_verified = true;
+        $this->verification_code = null;
+        $this->verification_code_expires_at = null;
+        $this->email_verified_at = now();
+        $this->save();
+    }
+
+    /**
+     * Check if user needs verification
+     */
+    public function needsVerification(): bool
+    {
+        return $this->role === 'patient' && !$this->is_verified;
     }
 }

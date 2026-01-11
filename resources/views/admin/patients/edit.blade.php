@@ -10,7 +10,7 @@
         <p class="text-muted small mb-0">Update patient informaton</p>
     </div>
     <a href="{{ route('admin.patients') }}" class="btn btn-outline-secondary btn-sm">
-        <i class="fas fa-arrow-left me-1"></i> Back
+        Back
     </a>
 </div>
 

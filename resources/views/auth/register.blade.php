@@ -152,7 +152,7 @@
                             <!-- Back Link -->
                             <div class="text-center mt-3">
                                 <a href="{{ route('home') }}" class="text-decoration-none small text-muted">
-                                    <i class="fas fa-arrow-left me-1"></i> Return to Homepage
+                                    Return to Homepage
                                 </a>
                             </div>
                         </form>

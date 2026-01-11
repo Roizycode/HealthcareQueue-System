@@ -253,7 +253,7 @@
                 <!-- Back Link -->
                 <div class="text-center mt-3 animate-fadeInUp" style="animation-delay: 0.2s;">
                     <a href="{{ route('queue.check') }}" class="text-muted text-decoration-none small">
-                        <i class="fas fa-arrow-left me-1"></i>Check Another Queue
+                        Check Another Queue
                     </a>
                 </div>
             </div>

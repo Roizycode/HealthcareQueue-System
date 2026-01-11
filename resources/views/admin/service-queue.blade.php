@@ -13,7 +13,7 @@
         <p class="text-muted small mb-0">Manage queue for this service</p>
     </div>
     <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary btn-sm">
-        <i class="fas fa-arrow-left me-1"></i> Back
+        Back
     </a>
 </div>
 

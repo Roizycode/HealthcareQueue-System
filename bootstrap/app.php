@@ -15,6 +15,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
+        
+        // Exclude verification routes from CSRF (secured by email+code validation)
+        $middleware->validateCsrfTokens(except: [
+            'patient/verify',
+            'patient/verify/resend',
+            'patient/reset-password',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

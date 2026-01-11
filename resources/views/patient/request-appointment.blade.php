@@ -120,7 +120,7 @@
                 
                 <div class="d-flex justify-content-between align-items-center">
                     <a href="{{ route('patient.dashboard') }}" class="btn btn-light">
-                        <i class="fas fa-arrow-left me-1"></i> Back
+                        Back
                     </a>
                     <button type="submit" class="btn btn-success px-4">
                         <i class="fas fa-paper-plane me-1"></i> Submit Request

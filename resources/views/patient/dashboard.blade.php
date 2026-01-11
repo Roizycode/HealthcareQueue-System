@@ -128,7 +128,7 @@
                         <i class="fas fa-history text-success me-2"></i>Recent Appointments
                     </h6>
                     <a href="{{ route('patient.appointments') }}" class="btn btn-sm btn-outline-success rounded-pill">
-                        View All <i class="fas fa-arrow-right ms-1"></i>
+                        View All
                     </a>
                 </div>
             </div>

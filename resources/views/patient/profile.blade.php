@@ -115,21 +115,56 @@
             </form>
         </div>
         
-        <!-- Account Security -->
+        <!-- Change Password -->
         <div class="patient-card p-4 mt-4">
             <h6 class="fw-bold mb-4">
-                <i class="fas fa-shield-alt text-warning me-2"></i>Account Security
+                <i class="fas fa-key text-warning me-2"></i>Change Password
             </h6>
             
-            <div class="alert alert-light border mb-0">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-lock text-muted me-3 fa-lg"></i>
-                    <div>
-                        <div class="fw-medium">Password</div>
-                        <small class="text-muted">To change your password, please contact our reception desk.</small>
+            <form action="{{ route('patient.change-password.submit') }}" method="POST">
+                @csrf
+                
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label small fw-medium">Current Password</label>
+                        <input type="password" 
+                               name="current_password" 
+                               class="form-control @error('current_password') is-invalid @enderror" 
+                               placeholder="Enter current password"
+                               required>
+                        @error('current_password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label small fw-medium">New Password</label>
+                        <input type="password" 
+                               name="password" 
+                               class="form-control @error('password') is-invalid @enderror" 
+                               placeholder="Enter new password"
+                               required>
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label small fw-medium">Confirm New Password</label>
+                        <input type="password" 
+                               name="password_confirmation" 
+                               class="form-control" 
+                               placeholder="Confirm new password"
+                               required>
                     </div>
                 </div>
-            </div>
+                
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-warning px-4">
+                        <i class="fas fa-lock me-1"></i> Update Password
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

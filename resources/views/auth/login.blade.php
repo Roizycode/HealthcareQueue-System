@@ -84,14 +84,14 @@
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm hover-lift" 
                                         style="background: linear-gradient(135deg, #0D6EFD 0%, #0dcaf0 100%); border: none;">
-                                    Sign In <i class="fas fa-arrow-right ms-2"></i>
+                                    Sign In
                                 </button>
                             </div>
 
                             <!-- Back Link -->
                             <div class="text-center mt-4">
                                 <a href="{{ route('home') }}" class="text-decoration-none small text-muted">
-                                    <i class="fas fa-arrow-left me-1"></i> Return to Homepage
+                                    Return to Homepage
                                 </a>
                             </div>
                         </form>

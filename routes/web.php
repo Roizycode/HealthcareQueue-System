@@ -61,6 +61,17 @@ Route::redirect('/admin/login', '/administrator/login');
 Route::get('/patient/login', [AuthController::class, 'showPatientLogin'])->name('patient.login');
 Route::post('/patient/login', [AuthController::class, 'patientLogin'])->name('patient.login.submit');
 
+// Patient Email Verification
+Route::get('/patient/verify', [AuthController::class, 'showVerify'])->name('patient.verify.show');
+Route::post('/patient/verify', [AuthController::class, 'verify'])->name('patient.verify.submit');
+Route::post('/patient/verify/resend', [AuthController::class, 'resendCode'])->name('patient.verify.resend');
+
+// Patient Forgot Password
+Route::get('/patient/forgot-password', [AuthController::class, 'showForgotPassword'])->name('patient.forgot-password');
+Route::post('/patient/forgot-password', [AuthController::class, 'forgotPassword'])->name('patient.forgot-password.submit');
+Route::get('/patient/reset-password', [AuthController::class, 'showResetPassword'])->name('patient.reset-password.show');
+Route::post('/patient/reset-password', [AuthController::class, 'resetPassword'])->name('patient.reset-password.submit');
+
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 // ==========================================
@@ -85,6 +96,10 @@ Route::prefix('patient')->name('patient.')->middleware(['auth', 'role:patient'])
     Route::post('/request-appointment', [App\Http\Controllers\PatientDashboardController::class, 'submitAppointmentRequest'])->name('request-appointment.submit');
     Route::get('/my-requests', [App\Http\Controllers\PatientDashboardController::class, 'myRequests'])->name('my-requests');
     Route::post('/cancel-request/{id}', [App\Http\Controllers\PatientDashboardController::class, 'cancelRequest'])->name('cancel-request');
+    
+    // Change Password (self-service)
+    Route::get('/change-password', [App\Http\Controllers\AuthController::class, 'showChangePassword'])->name('change-password');
+    Route::post('/change-password', [App\Http\Controllers\AuthController::class, 'changePassword'])->name('change-password.submit');
 });
 
 // ==========================================
@@ -202,4 +217,4 @@ Route::prefix('api')->name('api.')->group(function () {
         Route::get('/queue/stats', [QueueController::class, 'overallStats'])->name('queue.overall-stats');
     });
 });
-Route::get('/debug-rad', function() { return \App\Models\Queue::where('queue_number', 'RAD-002')->first() ?? 'Not Found'; });
+
